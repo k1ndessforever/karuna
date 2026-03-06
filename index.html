@@ -403,7 +403,12 @@
     </div>
     <div class="field-group">
       <label class="field-label" data-i18n="location">Location</label>
-      <input class="field-input" id="post-location">
+      <div style="display:flex;gap:6px;margin-bottom:6px;">
+        <input class="field-input" id="post-location" placeholder="Type area or landmark..." style="flex:1;" oninput="searchLocation(this.value)">
+        <button onclick="useGPS()" title="Use my location" style="background:rgba(42,61,30,0.6);border:1px solid rgba(138,171,122,0.3);border-radius:7px;color:var(--sage);padding:0 12px;cursor:pointer;font-size:1rem;transition:all 0.2s;white-space:nowrap;">📍 GPS</button>
+      </div>
+      <div id="location-search-results" style="background:rgba(26,18,8,0.95);border:1px solid rgba(138,171,122,0.2);border-radius:7px;display:none;max-height:160px;overflow-y:auto;position:relative;z-index:999;margin-bottom:4px;"></div>
+      <div style="font-size:0.6rem;color:rgba(245,239,230,0.3);">Or click anywhere on the map to pin exact location</div>
     </div>
     <div class="field-group">
       <label class="field-label" data-i18n="animalType">Animal Type</label>
@@ -740,7 +745,7 @@ function initMap() {
     attribution:'© OpenStreetMap contributors', maxZoom:19
   }).addTo(map);
   map.on('click', e => {
-    document.getElementById('post-location').value = `${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}`;
+    pinnedLat = e.latlng.lat; pinnedLng = e.latlng.lng; dropPin(pinnedLat, pinnedLng); document.getElementById('post-location').value = `${pinnedLat.toFixed(4)}, ${pinnedLng.toFixed(4)}`;
   });
 }
 
@@ -849,6 +854,9 @@ function closePostModal() {
   document.querySelectorAll('.type-btn').forEach(b => b.className='type-btn');
   ['post-title','post-desc','post-location'].forEach(id => document.getElementById(id).value='');
   document.getElementById('ai-preview').classList.remove('visible');
+  document.getElementById('location-search-results').style.display = 'none';
+  if (pinMarker) { map.removeLayer(pinMarker); pinMarker = null; }
+  pinnedLat = null; pinnedLng = null;
 }
 
 function selectType(type, btn) {
@@ -871,6 +879,9 @@ function updateAIPreview() {
     document.getElementById('ai-preview').classList.add('visible');
   } else {
     document.getElementById('ai-preview').classList.remove('visible');
+  document.getElementById('location-search-results').style.display = 'none';
+  if (pinMarker) { map.removeLayer(pinMarker); pinMarker = null; }
+  pinnedLat = null; pinnedLng = null;
   }
 }
 
@@ -884,10 +895,11 @@ async function submitReport() {
   const btn = document.getElementById('submit-btn');
   btn.textContent = 'Submitting...'; btn.disabled = true;
 
-  // Parse coordinates if typed as lat,lng
-  let lat = 19.0 + Math.random()*3, lng = 75.0 + Math.random()*5;
+  // Use pinned coordinates if available, else parse from text, else random Maharashtra
+  let lat = pinnedLat || 19.0 + Math.random()*3;
+  let lng = pinnedLng || 75.0 + Math.random()*5;
   const m = location.match(/(-?\d+\.\d+),\s*(-?\d+\.\d+)/);
-  if (m) { lat = parseFloat(m[1]); lng = parseFloat(m[2]); }
+  if (m && !pinnedLat) { lat = parseFloat(m[1]); lng = parseFloat(m[2]); }
 
   const report = {
     type: selectedType,
@@ -925,6 +937,87 @@ async function submitReport() {
   showToast((I18N[currentLang]||I18N.en).submitted);
 }
 
+
+
+// ── PIN MARKER on map click ──
+let pinMarker = null;
+let pinnedLat = null;
+let pinnedLng = null;
+
+// ── LOCATION SEARCH via Nominatim (OpenStreetMap) ──
+let searchTimer = null;
+function searchLocation(val) {
+  const results = document.getElementById('location-search-results');
+  clearTimeout(searchTimer);
+  if (val.length < 3) { results.style.display = 'none'; return; }
+  searchTimer = setTimeout(async () => {
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(val)}&format=json&limit=5&countrycodes=in`, {
+        headers: { 'Accept-Language': 'en', 'User-Agent': 'Karuna/1.0' }
+      });
+      const data = await res.json();
+      if (!data.length) { results.style.display = 'none'; return; }
+      results.style.display = 'block';
+      results.innerHTML = data.map(d => `
+        <div onclick="selectLocation('${d.display_name.replace(/'/g,"\\'")}',${d.lat},${d.lon})"
+          style="padding:9px 12px;cursor:pointer;font-size:0.75rem;
+          color:rgba(245,239,230,0.8);border-bottom:1px solid rgba(138,171,122,0.08);
+          transition:background 0.15s;"
+          onmouseover="this.style.background='rgba(42,61,30,0.6)'"
+          onmouseout="this.style.background='transparent'">
+          📍 ${d.display_name}
+        </div>`).join('');
+    } catch(e) { results.style.display = 'none'; }
+  }, 400);
+}
+
+function selectLocation(name, lat, lng) {
+  document.getElementById('post-location').value = name;
+  document.getElementById('location-search-results').style.display = 'none';
+  pinnedLat = parseFloat(lat);
+  pinnedLng = parseFloat(lng);
+  dropPin(pinnedLat, pinnedLng);
+  map.flyTo([pinnedLat, pinnedLng], 14, { duration: 1 });
+}
+
+// ── GPS ──
+function useGPS() {
+  if (!navigator.geolocation) { showToast('GPS not available on this device'); return; }
+  showToast('Getting your location...');
+  navigator.geolocation.getCurrentPosition(
+    async pos => {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+      pinnedLat = lat; pinnedLng = lng;
+      dropPin(lat, lng);
+      map.flyTo([lat, lng], 15, { duration: 1 });
+      // Reverse geocode to get place name
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`, {
+          headers: { 'User-Agent': 'Karuna/1.0' }
+        });
+        const data = await res.json();
+        const name = data.display_name || `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+        document.getElementById('post-location').value = name;
+      } catch(e) {
+        document.getElementById('post-location').value = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+      }
+      showToast('📍 Location captured');
+    },
+    err => showToast('Could not get location. Allow GPS access and try again.')
+  );
+}
+
+// ── DROP PIN on map ──
+function dropPin(lat, lng) {
+  if (pinMarker) map.removeLayer(pinMarker);
+  const icon = L.divIcon({
+    className: '',
+    html: `<div style="width:20px;height:20px;background:var(--rescue);border-radius:50%;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.5);animation:pulse 1s ease infinite;"></div>`,
+    iconSize: [20,20], iconAnchor: [10,10]
+  });
+  pinMarker = L.marker([lat, lng], { icon }).addTo(map);
+}
 
 function showToast(msg) {
   const t = document.getElementById('toast');
