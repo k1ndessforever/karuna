@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Karuna - करुणा</title>
+<link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="icon" type="image/png" sizes="192x192" href="assets/android-chrome-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="assets/android-chrome-512x512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Marathi:ital@0;1&family=DM+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  :root {
+    --soil: #1a1208;
+    --bark: #2d1f0e;
+    --moss: #2a3d1e;
+    --leaf: #4a7c3f;
+    --sage: #8aab7a;
+    --dusk: #c4956a;
+    --clay: #e8c4a0;
+    --cream: #f5efe6;
+    --rescue: #e05c3a;
+    --adopt: #4a9e6b;
+    --feed: #d4a832;
+    --sterilize: #5b8fc9;
+    --rip: #8a7a9e;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--soil); color: var(--cream); font-family: 'DM Mono', monospace; height: 100vh; overflow: hidden; }
+
+  /* ── LOADER ── */
+  #loader {
+    position: fixed; inset: 0; z-index: 9999;
+    background: var(--soil);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 16px;
+    transition: opacity 0.8s ease;
+  }
+  #loader .logo-big {
+    font-family: 'Tiro Devanagari Marathi', serif;
+    font-size: clamp(3rem, 8vw, 6rem);
+    color: var(--sage);
+    animation: breathe 2s ease-in-out infinite;
+  }
+  #loader .tagline { font-size: 0.72rem; color: var(--dusk); letter-spacing: 4px; text-transform: uppercase; opacity: 0; animation: fadeUp 1s ease 0.5s forwards; }
+  #loader .paw-loader { display: flex; gap: 6px; margin-top: 12px; }
+  #loader .paw-loader span { width: 8px; height: 8px; border-radius: 50%; background: var(--leaf); animation: pulse 1.2s ease infinite; }
+  #loader .paw-loader span:nth-child(2) { animation-delay: 0.2s; }
+  #loader .paw-loader span:nth-child(3) { animation-delay: 0.4s; }
+
+  /* ── LAYOUT ── */
+  #app { display: grid; grid-template-columns: 320px 1fr; grid-template-rows: 56px 1fr; height: 100vh; opacity: 0; transition: opacity 0.6s ease; }
+  #app.visible { opacity: 1; }
+
+  /* ── TOPBAR ── */
+  
+  #topbar {
+    grid-column: 1 / -1;
+    background: var(--bark);
+    border-bottom: 1px solid rgba(138,171,122,0.15);
+    display: flex; align-items: center; padding: 0 20px; gap: 16px;
+    position: relative; z-index: 100;
+  }
+  .brand { display: flex; align-items: baseline; gap: 8px; }
+  .brand-main { font-family: 'Tiro Devanagari Marathi', serif; font-size: 1.4rem; color: var(--sage); letter-spacing: -0.5px; }
+  .brand-en { font-size: 0.6rem; color: var(--dusk); letter-spacing: 3px; text-transform: uppercase; }
+  .topbar-center { flex: 1; display: flex; justify-content: center; gap: 4px; flex-wrap: wrap; }
+  .cat-pill { padding: 4px 12px; border-radius: 100px; font-size: 0.65rem; letter-spacing: 1.5px; text-transform: uppercase; border: 1px solid transparent; cursor: pointer; transition: all 0.2s ease; background: transparent; color: rgba(245,239,230,0.5); font-family: 'DM Mono', monospace; }
+  .cat-pill:hover { color: var(--cream); }
+  .cat-pill.active-rescue { background: rgba(224,92,58,0.15); border-color: var(--rescue); color: var(--rescue); }
+  .cat-pill.active-adopt { background: rgba(74,158,107,0.15); border-color: var(--adopt); color: var(--adopt); }
+  .cat-pill.active-feed { background: rgba(212,168,50,0.15); border-color: var(--feed); color: var(--feed); }
+  .cat-pill.active-sterilize { background: rgba(91,143,201,0.15); border-color: var(--sterilize); color: var(--sterilize); }
+  .cat-pill.active-rip { background: rgba(138,122,158,0.15); border-color: var(--rip); color: var(--rip); }
+  .cat-pill.active-all { background: rgba(138,171,122,0.15); border-color: var(--sage); color: var(--sage); }
+  .topbar-right { display: flex; align-items: center; gap: 10px; }
+  .user-chip { display: flex; align-items: center; gap: 6px; background: rgba(42,61,30,0.6); border: 1px solid rgba(138,171,122,0.2); padding: 5px 12px; border-radius: 100px; font-size: 0.7rem; color: var(--sage); }
+  .user-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--leaf); box-shadow: 0 0 6px var(--leaf); animation: pulse 2s ease infinite; }
+  .btn-post { background: var(--leaf); color: var(--cream); border: none; padding: 7px 16px; border-radius: 100px; font-family: 'DM Mono', monospace; font-size: 0.7rem; letter-spacing: 1px; cursor: pointer; text-transform: uppercase; transition: all 0.2s ease; }
+  .btn-post:hover { background: var(--sage); color: var(--soil); }
+
+  /* Language switcher in topbar */
+  .lang-switcher {
+    position: relative;
+  }
+  .lang-btn {
+    background: rgba(42,61,30,0.4);
+    border: 1px solid rgba(138,171,122,0.2);
+    color: var(--sage);
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 5px;
+    transition: all 0.2s;
+  }
+  .lang-btn:hover { background: rgba(42,61,30,0.8); }
+  .lang-dropdown {
+    position: absolute; top: calc(100% + 6px); right: 0;
+    background: var(--bark);
+    border: 1px solid rgba(138,171,122,0.2);
+    border-radius: 10px;
+    min-width: 200px;
+    z-index: 500;
+    overflow: hidden;
+    display: none;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+  }
+  .lang-dropdown.open { display: block; animation: slideUp 0.2s ease; }
+  .lang-section-title {
+    font-size: 0.55rem; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--dusk); padding: 10px 14px 6px;
+  }
+  .lang-divider { border: none; border-top: 1px solid rgba(138,171,122,0.1); margin: 4px 0; }
+  .lang-option {
+    padding: 9px 14px;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 10px;
+    transition: background 0.15s;
+    font-size: 0.72rem;
+  }
+  .lang-option:hover { background: rgba(42,61,30,0.5); }
+  .lang-option.active { background: rgba(42,61,30,0.7); color: var(--sage); }
+  .lang-native { font-size: 0.85rem; min-width: 28px; }
+  .lang-name { color: var(--cream); }
+  .lang-tag { margin-left: auto; font-size: 0.55rem; letter-spacing: 1px; padding: 2px 6px; border-radius: 3px; background: rgba(138,171,122,0.1); color: var(--sage); }
+  .lang-featured { border-left: 2px solid var(--sage); }
+
+  /* ── SIDEBAR ── */
+  #sidebar { background: var(--bark); border-right: 1px solid rgba(138,171,122,0.1); overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; }
+  #sidebar::-webkit-scrollbar { width: 3px; }
+  #sidebar::-webkit-scrollbar-thumb { background: var(--moss); border-radius: 2px; }
+  .sidebar-header { padding: 16px 20px 12px; border-bottom: 1px solid rgba(138,171,122,0.08); display: flex; align-items: center; justify-content: space-between; }
+  .sidebar-title { font-size: 0.65rem; letter-spacing: 3px; text-transform: uppercase; color: var(--dusk); }
+  .live-badge { display: flex; align-items: center; gap: 4px; font-size: 0.6rem; color: var(--rescue); letter-spacing: 1px; }
+  .live-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--rescue); animation: pulse 1s ease infinite; }
+
+  /* ── REPORT CARDS ── */
+  .report-card { padding: 14px 20px; border-bottom: 1px solid rgba(138,171,122,0.06); cursor: pointer; transition: background 0.15s ease; }
+  .report-card:hover { background: rgba(42,61,30,0.4); }
+  .report-card.rip-card {
+  border-left: 2px solid var(--rip);
+  background-image: url('assets/rip-memorial-bg.png');
+  background-size: cover;
+  background-blend-mode: multiply;
+}
+  .card-top { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .card-type-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .card-type-label { font-size: 0.6rem; letter-spacing: 2px; text-transform: uppercase; }
+  .card-time { margin-left: auto; font-size: 0.6rem; color: rgba(245,239,230,0.35); }
+  .card-title { font-family: 'Instrument Serif', serif; font-size: 0.95rem; color: var(--cream); line-height: 1.3; margin-bottom: 5px; }
+  .card-location { font-size: 0.65rem; color: var(--dusk); }
+  .card-location::before { content: '◎ '; font-size: 0.55rem; }
+  .card-footer { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+  .card-anon { font-size: 0.6rem; color: rgba(245,239,230,0.3); background: rgba(255,255,255,0.04); padding: 2px 7px; border-radius: 3px; }
+  .card-ai-flag { font-size: 0.58rem; padding: 2px 7px; border-radius: 3px; }
+  .flag-verified { background: rgba(74,158,107,0.15); color: var(--adopt); }
+  .flag-review { background: rgba(224,92,58,0.15); color: var(--rescue); }
+  .flag-rip { background: rgba(138,122,158,0.15); color: var(--rip); }
+  .rip-notice { font-size: 0.7rem; color: var(--rip); font-style: italic; margin-top: 5px; line-height: 1.4; }
+
+  /* ── MAP ── */
+  #map { position: relative; z-index: 1; }
+  #leaflet-map { width: 100%; height: 100%; }
+  .leaflet-tile { filter: brightness(0.4) saturate(0.6) hue-rotate(10deg); }
+  .leaflet-control-zoom a { background: var(--bark) !important; color: var(--sage) !important; border-color: rgba(138,171,122,0.2) !important; }
+  .leaflet-control-attribution { background: rgba(26,18,8,0.8) !important; color: rgba(245,239,230,0.2) !important; font-size: 9px !important; }
+
+  #map-stats { position: absolute; top: 16px; right: 16px; z-index: 500; display: flex; gap: 8px; }
+  .stat-chip { background: rgba(26,18,8,0.88); border: 1px solid rgba(138,171,122,0.12); border-radius: 6px; padding: 6px 10px; text-align: center; backdrop-filter: blur(8px); }
+  .stat-num { font-size: 1rem; color: var(--sage); display: block; line-height: 1; }
+  .stat-label { font-size: 0.55rem; color: var(--dusk); letter-spacing: 1px; text-transform: uppercase; display: block; margin-top: 2px; }
+
+  #map-legend { position: absolute; bottom: 24px; right: 16px; z-index: 500; background: rgba(26,18,8,0.92); border: 1px solid rgba(138,171,122,0.15); border-radius: 8px; padding: 12px 14px; backdrop-filter: blur(8px); }
+  .legend-title { font-size: 0.58rem; letter-spacing: 2px; text-transform: uppercase; color: var(--dusk); margin-bottom: 8px; }
+  .legend-item { display: flex; align-items: center; gap: 7px; font-size: 0.62rem; color: rgba(245,239,230,0.7); margin-bottom: 5px; }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  #detail-panel { position: absolute; top: 16px; left: 16px; z-index: 500; background: rgba(26,18,8,0.95); border: 1px solid rgba(138,171,122,0.2); border-radius: 10px; width: 280px; padding: 18px; backdrop-filter: blur(10px); display: none; animation: slideUp 0.2s ease; }
+  #detail-panel.open { display: block; }
+  .detail-close { position: absolute; top: 12px; right: 12px; background: none; border: none; color: rgba(245,239,230,0.3); cursor: pointer; font-size: 1rem; }
+  .detail-type { font-size: 0.6rem; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+  .detail-title { font-family: 'Instrument Serif', serif; font-size: 1.1rem; color: var(--cream); margin-bottom: 6px; line-height: 1.3; }
+  .detail-desc { font-size: 0.7rem; color: rgba(245,239,230,0.6); line-height: 1.6; margin-bottom: 12px; }
+  .detail-meta { font-size: 0.62rem; color: var(--dusk); margin-bottom: 10px; }
+  .btn-reply { width: 100%; padding: 8px; background: rgba(42,61,30,0.6); border: 1px solid rgba(138,171,122,0.2); border-radius: 6px; color: var(--sage); font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: all 0.2s; }
+  .btn-reply:hover { background: rgba(42,61,30,0.9); }
+
+  /* ── MODALS ── */
+  #modal-overlay { position: fixed; inset: 0; z-index: 1000; background: rgba(10,8,4,0.85); backdrop-filter: blur(6px); display: none; align-items: center; justify-content: center; }
+  #modal-overlay.open { display: flex; }
+  .modal { background: var(--bark); border: 1px solid rgba(138,171,122,0.2); border-radius: 12px; width: min(520px, 92vw); max-height: 88vh; overflow-y: auto; padding: 28px; animation: slideUp 0.3s ease; }
+  .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .modal-title { font-family: 'Instrument Serif', serif; font-size: 1.3rem; color: var(--sage); }
+  .modal-close { background: none; border: none; color: rgba(245,239,230,0.4); font-size: 1.2rem; cursor: pointer; }
+  .modal-close:hover { color: var(--cream); }
+  .field-label { font-size: 0.63rem; letter-spacing: 2px; text-transform: uppercase; color: var(--dusk); margin-bottom: 6px; display: block; }
+  .field-group { margin-bottom: 16px; }
+  .type-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 16px; }
+  .type-btn { padding: 10px; border-radius: 8px; border: 1px solid rgba(138,171,122,0.15); background: transparent; color: rgba(245,239,230,0.5); font-family: 'DM Mono', monospace; font-size: 0.68rem; letter-spacing: 1px; cursor: pointer; transition: all 0.2s; text-align: left; display: flex; align-items: center; gap: 7px; }
+  .type-btn:hover { background: rgba(42,61,30,0.4); color: var(--cream); }
+  .type-btn.selected-rescue { border-color: var(--rescue); color: var(--rescue); background: rgba(224,92,58,0.1); }
+  .type-btn.selected-adopt { border-color: var(--adopt); color: var(--adopt); background: rgba(74,158,107,0.1); }
+  .type-btn.selected-feed { border-color: var(--feed); color: var(--feed); background: rgba(212,168,50,0.1); }
+  .type-btn.selected-sterilize { border-color: var(--sterilize); color: var(--sterilize); background: rgba(91,143,201,0.1); }
+  .field-input, .field-textarea, .field-select { width: 100%; background: rgba(26,18,8,0.6); border: 1px solid rgba(138,171,122,0.15); border-radius: 7px; color: var(--cream); font-family: 'DM Mono', monospace; font-size: 0.78rem; padding: 10px 12px; outline: none; transition: border-color 0.2s; }
+  .field-input:focus, .field-textarea:focus, .field-select:focus { border-color: rgba(138,171,122,0.4); }
+  .field-textarea { resize: vertical; min-height: 80px; }
+  .field-select option { background: var(--bark); }
+  .anon-notice { background: rgba(42,61,30,0.3); border: 1px solid rgba(138,171,122,0.1); border-radius: 6px; padding: 10px 12px; font-size: 0.65rem; color: var(--sage); margin-bottom: 16px; line-height: 1.5; }
+  .ai-preview { background: rgba(91,143,201,0.08); border: 1px solid rgba(91,143,201,0.2); border-radius: 6px; padding: 10px 12px; font-size: 0.65rem; color: rgba(91,143,201,0.9); margin-bottom: 16px; display: none; line-height: 1.5; }
+  .ai-preview.visible { display: block; }
+  .btn-submit { width: 100%; background: var(--leaf); color: var(--cream); border: none; padding: 12px; border-radius: 8px; font-family: 'DM Mono', monospace; font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all 0.2s; }
+  .btn-submit:hover { background: var(--sage); color: var(--soil); }
+  .btn-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* ── ONBOARDING ── */
+  #onboard-overlay {
+  position: fixed; inset: 0; z-index: 2000;
+  background: rgba(10,8,4,0.97);
+  background-image: url('assets/onboarding-bg.png');
+  background-size: cover;
+  background-blend-mode: multiply;
+  display: flex; align-items: center; justify-content: center;
+}
+  .onboard-box { background: var(--bark); border: 1px solid rgba(138,171,122,0.25); border-radius: 14px; width: min(460px, 92vw); padding: 36px 32px; animation: slideUp 0.4s ease; text-align: center; }
+  .onboard-paw { font-size: 2.5rem; margin-bottom: 12px; }
+  .onboard-title { font-family: 'Tiro Devanagari Marathi', serif; font-size: 2.2rem; color: var(--sage); margin-bottom: 2px; }
+  .onboard-sub { font-size: 0.65rem; color: var(--dusk); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 8px; }
+  .onboard-tagline { font-family: 'Instrument Serif', serif; font-style: italic; font-size: 0.82rem; color: rgba(196,149,106,0.7); margin-bottom: 22px; line-height: 1.5; }
+  .onboard-question { font-family: 'Instrument Serif', serif; font-size: 1rem; color: var(--cream); margin-bottom: 18px; line-height: 1.5; }
+  .onboard-input { width: 100%; background: rgba(26,18,8,0.6); border: 1px solid rgba(138,171,122,0.2); border-radius: 8px; color: var(--cream); font-family: 'DM Mono', monospace; font-size: 0.78rem; padding: 11px 14px; outline: none; margin-bottom: 10px; text-align: center; transition: border-color 0.2s; }
+  .onboard-input:focus { border-color: var(--sage); }
+  .onboard-privacy { font-size: 0.6rem; color: rgba(245,239,230,0.28); margin-bottom: 18px; line-height: 1.7; }
+  .onboard-privacy a { color: var(--sage); text-decoration: none; }
+
+  /* Onboard language picker */
+  .onboard-lang-label { font-size: 0.6rem; letter-spacing: 2px; text-transform: uppercase; color: var(--dusk); margin-bottom: 10px; display: block; text-align: left; }
+  .onboard-lang-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 18px; }
+  .onboard-lang-btn { padding: 7px 4px; border-radius: 7px; border: 1px solid rgba(138,171,122,0.12); background: rgba(26,18,8,0.4); color: rgba(245,239,230,0.5); font-family: 'DM Mono', monospace; font-size: 0.6rem; cursor: pointer; text-align: center; transition: all 0.2s; line-height: 1.4; }
+  .onboard-lang-btn:hover { border-color: rgba(138,171,122,0.3); color: var(--cream); }
+  .onboard-lang-btn.selected { border-color: var(--sage); background: rgba(42,61,30,0.5); color: var(--sage); }
+  .onboard-lang-btn.featured { border-color: rgba(138,171,122,0.25); }
+  .lang-native-big { font-size: 1rem; display: block; margin-bottom: 2px; }
+
+  /* ── TOAST ── */
+  #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--moss); border: 1px solid rgba(138,171,122,0.3); color: var(--cream); padding: 10px 20px; border-radius: 100px; font-size: 0.72rem; z-index: 3000; opacity: 0; transition: opacity 0.3s ease; white-space: nowrap; }
+  #toast.show { opacity: 1; }
+
+  @keyframes breathe { 0%,100%{opacity:.8;transform:scale(1)} 50%{opacity:1;transform:scale(1.03)} }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  @keyframes slideUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+</style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="logo-big">करुणा</div>
+  <div class="tagline">We don't beg for sympathy it's within us</div>
+  <div class="paw-loader"><span></span><span></span><span></span></div>
+</div>
+
+<!-- ONBOARDING -->
+<div id="onboard-overlay">
+  <div class="onboard-box">
+    <div class="onboard-paw">🐾</div>
+    <div class="onboard-title">करुणा</div>
+    <div class="onboard-sub">Karuna · Animal Welfare Network</div>
+    <div class="onboard-tagline">"We don't beg for sympathy — it's within us."</div>
+
+    <span class="onboard-lang-label">Choose your language · भाषा निवडा</span>
+    <div class="onboard-lang-grid" id="lang-grid"></div>
+
+    <div class="onboard-question" id="onboard-q">Why are you here?</div>
+    <input class="onboard-input" id="onboard-answer" placeholder="I want to help animals in my area..." maxlength="200">
+    <input class="onboard-input" id="onboard-nick" placeholder="Choose a nickname (anonymous)" maxlength="24">
+    <input class="onboard-input" id="onboard-email" placeholder="Email (for OTP verification)" maxlength="60">
+    <div class="onboard-privacy">
+      🔒 No real name. No phone number. No tracking.<br>
+      Your email is used only for OTP — never shared, never sold.<br>
+      Built on <a href="#">open source</a> tools. Honest by design.
+    </div>
+    <button class="btn-submit" onclick="completeOnboard()" id="onboard-btn">Enter Karuna →</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <!-- TOPBAR -->
+  <div id="topbar">
+    <div class="brand">
+  <img src="assets/logo.png" alt="Karuna" height="32" style="margin-right:8px;">
+  <span class="brand-main" id="brand-text">करुणा</span>
+  <span class="brand-en">Karuna</span>
+</div>
+    <div class="topbar-center">
+      <button class="cat-pill active-all" onclick="filterReports('all',this)" data-i18n="all">All</button>
+      <button class="cat-pill" onclick="filterReports('rescue',this)" data-i18n="rescue">🆘 Rescue</button>
+      <button class="cat-pill" onclick="filterReports('adopt',this)" data-i18n="adopt">🏠 Adopt</button>
+      <button class="cat-pill" onclick="filterReports('feed',this)" data-i18n="feed">🍲 Feed</button>
+      <button class="cat-pill" onclick="filterReports('sterilize',this)" data-i18n="sterilize">✂️ Sterilize</button>
+      <button class="cat-pill" onclick="filterReports('rip',this)" data-i18n="gone">🕊️ Gone</button>
+    </div>
+    <div class="topbar-right">
+        <a href="about-karuna.html" style="
+        font-family:'DM Mono',monospace;
+        font-size:0.65rem;
+        letter-spacing:2px;
+        text-transform:uppercase;
+        color:var(--sage);
+        text-decoration:none;
+        padding:5px 12px;
+        border:1px solid rgba(138,171,122,0.3);
+        border-radius:4px;
+        ">About</a>
+      <!-- Language Switcher -->
+      <div class="lang-switcher">
+        <button class="lang-btn" onclick="toggleLangDropdown()" id="lang-btn-label">🌐 EN</button>
+        <div class="lang-dropdown" id="lang-dropdown"></div>
+      </div>
+      <div class="user-chip"><div class="user-dot"></div><span id="user-nick">—</span></div>
+      <button class="btn-post" onclick="openPostModal()" data-i18n="report">+ Report</button>
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <div id="sidebar">
+    <div class="sidebar-header">
+      <span class="sidebar-title" data-i18n="liveReports">Live Reports</span>
+      <span class="live-badge"><span class="live-dot"></span> Live</span>
+    </div>
+    <div id="reports-list">
+  <div id="empty-state" style="display:none; text-align:center; padding:40px 20px;">
+    <img src="assets/empty-state.png" alt="Be the first to help here" 
+         style="width:140px; opacity:0.6; margin-bottom:12px;">
+    <div style="font-size:0.7rem; color:rgba(245,239,230,0.3); 
+                letter-spacing:2px; text-transform:uppercase;">
+      Be the first to help here
+    </div>
+  </div>
+</div>
+  </div>
+
+  <!-- MAP -->
+  <div id="map">
+    <div id="leaflet-map"></div>
+    <div id="map-stats">
+      <div class="stat-chip"><span class="stat-num" id="stat-rescue">0</span><span class="stat-label" data-i18n="rescue">Rescue</span></div>
+      <div class="stat-chip"><span class="stat-num" id="stat-adopt">0</span><span class="stat-label" data-i18n="adopt">Adopt</span></div>
+      <div class="stat-chip"><span class="stat-num" id="stat-feed">0</span><span class="stat-label" data-i18n="feedSpots">Feed Spots</span></div>
+      <div class="stat-chip"><span class="stat-num" id="stat-rip" style="color:var(--rip)">0</span><span class="stat-label" data-i18n="gone">Gone</span></div>
+    </div>
+    <div id="detail-panel">
+      <button class="detail-close" onclick="closeDetail()">✕</button>
+      <div class="detail-type" id="detail-type"></div>
+      <div class="detail-title" id="detail-title"></div>
+      <div class="detail-desc" id="detail-desc"></div>
+      <div class="detail-meta" id="detail-meta"></div>
+      <button class="btn-reply" onclick="showToast('🔒 Private reply sent anonymously')" data-i18n="replyPrivately">↗ Reply Privately</button>
+    </div>
+    <div id="map-legend">
+      <div class="legend-title" data-i18n="mapKey">Map Key</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--rescue)"></div><span data-i18n="rescueLabel">Injured / Rescue</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--adopt)"></div><span data-i18n="adoptLabel">Adoption Available</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--feed)"></div><span data-i18n="feedLabel">Feeding Spot</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--sterilize)"></div><span data-i18n="sterilizeLabel">Sterilization Drive</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--rip)"></div><span data-i18n="ripLabel">Remembered 🕊️</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- POST MODAL -->
+<div id="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" data-i18n="reportAnimal">Report an Animal</div>
+      <button class="modal-close" onclick="closePostModal()">✕</button>
+    </div>
+    <div class="anon-notice" data-i18n="anonNotice">🔒 Your post is anonymous. Your nickname will appear, never your real identity.</div>
+    <label class="field-label" data-i18n="typeOfReport">Type of Report</label>
+    <div class="type-grid">
+      <button class="type-btn" onclick="selectType('rescue',this)">🆘 <span data-i18n="injuredRescue">Injured / Rescue</span></button>
+      <button class="type-btn" onclick="selectType('adopt',this)">🏠 <span data-i18n="adoption">Adoption</span></button>
+      <button class="type-btn" onclick="selectType('feed',this)">🍲 <span data-i18n="feedingSpot">Feeding Spot</span></button>
+      <button class="type-btn" onclick="selectType('sterilize',this)">✂️ <span data-i18n="sterilization">Sterilization</span></button>
+    </div>
+    <div class="field-group">
+      <label class="field-label" data-i18n="animalSituation">Animal & Situation</label>
+      <input class="field-input" id="post-title" oninput="updateAIPreview()">
+    </div>
+    <div class="field-group">
+      <label class="field-label" data-i18n="description">Description</label>
+      <textarea class="field-textarea" id="post-desc"></textarea>
+    </div>
+    <div class="field-group">
+      <label class="field-label" data-i18n="location">Location</label>
+      <input class="field-input" id="post-location">
+    </div>
+    <div class="field-group">
+      <label class="field-label" data-i18n="animalType">Animal Type</label>
+      <select class="field-select" id="post-animal">
+        <option value="">Select animal...</option>
+        <option>Dog</option><option>Cat</option><option>Cattle / Cow</option>
+        <option>Horse / Donkey</option><option>Wildlife</option><option>Bird</option><option>Other</option>
+      </select>
+    </div>
+    <div class="ai-preview" id="ai-preview"><strong>🤖 AI:</strong> <span id="ai-preview-text"></span></div>
+    <button class="btn-submit" id="submit-btn" onclick="submitReport()" data-i18n="submitReport">Submit Report →</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ══════════════════════════════════════
+// LANGUAGE SYSTEM
+// ══════════════════════════════════════
+const LANGUAGES = [
+  // Featured (shown prominently)
+  { code: 'en', name: 'English',    native: 'A',  nativeFull: 'English',   featured: true },
+  { code: 'hi', name: 'Hindi',      native: 'हि', nativeFull: 'हिन्दी',    featured: true },
+  { code: 'mr', name: 'Marathi',    native: 'म',  nativeFull: 'मराठी',     featured: true },
+  { code: 'ur', name: 'Urdu',       native: 'اُ', nativeFull: 'اردو',      featured: true },
+  // Other top languages
+  { code: 'es', name: 'Spanish',    native: 'Es', nativeFull: 'Español',   featured: false },
+  { code: 'fr', name: 'French',     native: 'Fr', nativeFull: 'Français',  featured: false },
+  { code: 'de', name: 'German',     native: 'De', nativeFull: 'Deutsch',   featured: false },
+  { code: 'pt', name: 'Portuguese', native: 'Pt', nativeFull: 'Português', featured: false },
+  { code: 'ar', name: 'Arabic',     native: 'ع',  nativeFull: 'العربية',   featured: false },
+  { code: 'bn', name: 'Bengali',    native: 'ব',  nativeFull: 'বাংলা',     featured: false },
+  { code: 'ta', name: 'Tamil',      native: 'த',  nativeFull: 'தமிழ்',    featured: false },
+  { code: 'te', name: 'Telugu',     native: 'తె', nativeFull: 'తెలుగు',   featured: false },
+];
+
+const I18N = {
+  en: {
+    brandText: 'करुणा',
+    tagline: "We don't beg for sympathy — it's within us.",
+    why: 'Why are you here?',
+    all: 'All', rescue: 'Rescue', adopt: 'Adopt', feed: 'Feed',
+    sterilize: 'Sterilize', gone: 'Gone', report: '+ Report',
+    liveReports: 'Live Reports', mapKey: 'Map Key',
+    rescueLabel: 'Injured / Rescue', adoptLabel: 'Adoption Available',
+    feedLabel: 'Feeding Spot', sterilizeLabel: 'Sterilization Drive',
+    ripLabel: 'Remembered 🕊️', feedSpots: 'Feed Spots',
+    replyPrivately: '↗ Reply Privately',
+    reportAnimal: 'Report an Animal',
+    anonNotice: '🔒 Anonymous post. Your nickname appears, never your identity.',
+    typeOfReport: 'Type of Report', animalSituation: 'Animal & Situation',
+    description: 'Description', location: 'Location', animalType: 'Animal Type',
+    submitReport: 'Submit Report →',
+    injuredRescue: 'Injured / Rescue', adoption: 'Adoption',
+    feedingSpot: 'Feeding Spot', sterilization: 'Sterilization',
+    welcome: (nick) => `Welcome, ${nick} 🐾 You are now part of Karuna`,
+    submitted: '✓ Report posted anonymously. Volunteers notified. 🐾',
+  },
+  hi: {
+    brandText: 'करुणा',
+    tagline: 'हम सहानुभूति की भीख नहीं माँगते — वो हमारे भीतर है।',
+    why: 'आप यहाँ क्यों आए हैं?',
+    all: 'सभी', rescue: 'बचाव', adopt: 'गोद लें', feed: 'खाना',
+    sterilize: 'नसबंदी', gone: 'स्वर्गीय', report: '+ रिपोर्ट',
+    liveReports: 'लाइव रिपोर्ट', mapKey: 'नक्शे की चाबी',
+    rescueLabel: 'घायल / बचाव', adoptLabel: 'गोद लेने के लिए',
+    feedLabel: 'खाना खिलाने की जगह', sterilizeLabel: 'नसबंदी अभियान',
+    ripLabel: 'याद में 🕊️', feedSpots: 'खाना स्थान',
+    replyPrivately: '↗ निजी उत्तर',
+    reportAnimal: 'जानवर की रिपोर्ट करें',
+    anonNotice: '🔒 आपकी पोस्ट गुमनाम है। उपनाम दिखेगा, असली पहचान नहीं।',
+    typeOfReport: 'रिपोर्ट का प्रकार', animalSituation: 'जानवर और स्थिति',
+    description: 'विवरण', location: 'स्थान', animalType: 'जानवर का प्रकार',
+    submitReport: 'रिपोर्ट जमा करें →',
+    injuredRescue: 'घायल / बचाव', adoption: 'गोद लेना',
+    feedingSpot: 'खाना खिलाने की जगह', sterilization: 'नसबंदी',
+    welcome: (nick) => `स्वागत है, ${nick} 🐾 आप अब करुणा का हिस्सा हैं`,
+    submitted: '✓ रिपोर्ट गुमनाम रूप से पोस्ट की गई। स्वयंसेवकों को सूचित किया। 🐾',
+  },
+  mr: {
+    brandText: 'करुणा',
+    tagline: 'आम्ही सहानुभूतीसाठी भीक मागत नाही — ती आमच्या आत आहे.',
+    why: 'तुम्ही इथे का आलात?',
+    all: 'सर्व', rescue: 'बचाव', adopt: 'दत्तक', feed: 'अन्न',
+    sterilize: 'नसबंदी', gone: 'स्वर्गीय', report: '+ तक्रार',
+    liveReports: 'थेट अहवाल', mapKey: 'नकाशा',
+    rescueLabel: 'जखमी / बचाव', adoptLabel: 'दत्तकसाठी',
+    feedLabel: 'खाद्य ठिकाण', sterilizeLabel: 'नसबंदी मोहीम',
+    ripLabel: 'स्मरणात 🕊️', feedSpots: 'अन्न ठिकाणे',
+    replyPrivately: '↗ खाजगी उत्तर',
+    reportAnimal: 'प्राण्याची तक्रार करा',
+    anonNotice: '🔒 तुमची पोस्ट गुप्त आहे. टोपणनाव दिसेल, खरी ओळख नाही.',
+    typeOfReport: 'तक्रारीचा प्रकार', animalSituation: 'प्राणी आणि परिस्थिती',
+    description: 'तपशील', location: 'ठिकाण', animalType: 'प्राण्याचा प्रकार',
+    submitReport: 'तक्रार सादर करा →',
+    injuredRescue: 'जखमी / बचाव', adoption: 'दत्तक',
+    feedingSpot: 'खाद्य ठिकाण', sterilization: 'नसबंदी',
+    welcome: (nick) => `स्वागत, ${nick} 🐾 तुम्ही आता करुणाचे भाग आहात`,
+    submitted: '✓ तक्रार गुप्तपणे पोस्ट केली. स्वयंसेवकांना कळवले. 🐾',
+  },
+  ur: {
+    brandText: 'کرونا',
+    tagline: 'ہم ہمدردی کی بھیک نہیں مانگتے — یہ ہمارے اندر ہے۔',
+    why: 'آپ یہاں کیوں آئے ہیں؟',
+    all: 'سب', rescue: 'بچاؤ', adopt: 'گود لیں', feed: 'کھانا',
+    sterilize: 'نسبندی', gone: 'مرحوم', report: '+ رپورٹ',
+    liveReports: 'لائیو رپورٹیں', mapKey: 'نقشہ',
+    rescueLabel: 'زخمی / بچاؤ', adoptLabel: 'گود لینے کیلیے',
+    feedLabel: 'کھانے کی جگہ', sterilizeLabel: 'نسبندی مہم',
+    ripLabel: 'یاد میں 🕊️', feedSpots: 'کھانے کی جگہیں',
+    replyPrivately: '↗ نجی جواب',
+    reportAnimal: 'جانور کی رپورٹ کریں',
+    anonNotice: '🔒 آپ کی پوسٹ گمنام ہے۔ عرفی نام ظاہر ہوگا، اصلی شناخت نہیں۔',
+    typeOfReport: 'رپورٹ کی قسم', animalSituation: 'جانور اور صورتحال',
+    description: 'تفصیل', location: 'مقام', animalType: 'جانور کی قسم',
+    submitReport: 'رپورٹ جمع کریں →',
+    injuredRescue: 'زخمی / بچاؤ', adoption: 'گود لینا',
+    feedingSpot: 'کھانے کی جگہ', sterilization: 'نسبندی',
+    welcome: (nick) => `خوش آمدید، ${nick} 🐾 آپ اب کرونا کا حصہ ہیں`,
+    submitted: '✓ رپورٹ گمنام طریقے سے پوسٹ ہوئی۔ رضاکاروں کو مطلع کیا۔ 🐾',
+  },
+};
+
+// Other langs fall back to English with native label shown
+LANGUAGES.filter(l => !['en','hi','mr','ur'].includes(l.code)).forEach(l => {
+  I18N[l.code] = { ...I18N['en'] };
+});
+
+let currentLang = 'en';
+let currentUser = null;
+let selectedType = null;
+let map = null;
+let markers = [];
+let allReports = [];
+let activeFilter = 'all';
+
+const COLORS = { rescue:'#e05c3a', adopt:'#4a9e6b', feed:'#d4a832', sterilize:'#5b8fc9', rip:'#8a7a9e' };
+const EMOJIS = { rescue:'🆘', adopt:'🏠', feed:'🍲', sterilize:'✂️', rip:'🕊️' };
+
+// ── RENDER LANGUAGE GRIDS ──
+function renderLangGrids() {
+  // Onboard grid
+  const grid = document.getElementById('lang-grid');
+  grid.innerHTML = LANGUAGES.map(l => `
+    <button class="onboard-lang-btn ${l.featured ? 'featured' : ''} ${l.code === currentLang ? 'selected' : ''}"
+            onclick="setLang('${l.code}', true)" id="olb-${l.code}">
+      <span class="lang-native-big">${l.native}</span>
+      <span style="font-size:0.58rem">${l.name}</span>
+    </button>
+  `).join('');
+
+  // Topbar dropdown
+  const dd = document.getElementById('lang-dropdown');
+  const featured = LANGUAGES.filter(l => l.featured);
+  const others = LANGUAGES.filter(l => !l.featured);
+  dd.innerHTML = `
+    <div class="lang-section-title">Featured</div>
+    ${featured.map(l => langOptionHTML(l)).join('')}
+    <hr class="lang-divider">
+    <div class="lang-section-title">All Languages</div>
+    ${others.map(l => langOptionHTML(l)).join('')}
+  `;
+}
+
+function langOptionHTML(l) {
+  return `<div class="lang-option ${l.featured ? 'lang-featured' : ''} ${l.code === currentLang ? 'active' : ''}"
+    onclick="setLang('${l.code}')" id="lopt-${l.code}">
+    <span class="lang-native">${l.native}</span>
+    <span class="lang-name">${l.nativeFull}</span>
+    ${l.featured ? `<span class="lang-tag">featured</span>` : ''}
+  </div>`;
+}
+
+function setLang(code, fromOnboard = false) {
+  currentLang = code;
+  const lang = LANGUAGES.find(l => l.code === code);
+
+  // Update active states
+  document.querySelectorAll('.onboard-lang-btn').forEach(b => b.classList.remove('selected'));
+  const olb = document.getElementById(`olb-${code}`);
+  if (olb) olb.classList.add('selected');
+  document.querySelectorAll('.lang-option').forEach(b => b.classList.remove('active'));
+  const lopt = document.getElementById(`lopt-${code}`);
+  if (lopt) lopt.classList.add('active');
+
+  // Update topbar button
+  document.getElementById('lang-btn-label').textContent = `🌐 ${lang.code.toUpperCase()}`;
+
+  // Apply translations
+  applyI18n();
+
+  if (!fromOnboard) {
+    toggleLangDropdown(true);
+    showToast(`Language: ${lang.nativeFull}`);
+  }
+}
+
+function applyI18n() {
+  const t = I18N[currentLang] || I18N['en'];
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    if (t[key]) el.textContent = t[key];
+  });
+  // Special cases
+  const btext = document.getElementById('brand-text');
+  if (btext) btext.textContent = t.brandText || 'करुणा';
+  const oq = document.getElementById('onboard-q');
+  if (oq) oq.textContent = t.why;
+
+  // RTL for Urdu/Arabic
+  document.body.style.direction = ['ur','ar'].includes(currentLang) ? 'rtl' : 'ltr';
+}
+
+function toggleLangDropdown(forceClose = false) {
+  const dd = document.getElementById('lang-dropdown');
+  if (forceClose) { dd.classList.remove('open'); return; }
+  dd.classList.toggle('open');
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.lang-switcher')) toggleLangDropdown(true);
+});
+
+// ── SEED DATA ──
+// ── SUPABASE CONFIG ──
+// Replace these two values with your actual keys from Supabase → Settings → API
+const SUPABASE_URL = 'https://nhvwzjmsqqdyxojqxics.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5odnd6am1zcXFkeXhvanF4aWNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4MTE0MDUsImV4cCI6MjA4ODM4NzQwNX0.ogJ46mE8fU3Jts3_y7tmJ9Es8qpKEWBWscX4a55u4nY';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Seed data shown only when database is empty or loading
+const SEED_REPORTS = [
+  { id:'seed-1', type:'rescue', title:'Injured stray dog, rear leg wound', desc:'Brown dog, adult male. Hit by vehicle, dragging hind leg. Conscious but cannot move. Needs urgent vet.', location_name:'Kalamb Bus Stand, Yavatmal', lat:20.0833, lng:77.9500, animal_type:'Dog', nickname:'SavitriK', created_at: new Date(Date.now()-12*60000).toISOString(), ai_flag:'verified' },
+  { id:'seed-2', type:'adopt', title:'3 kittens need home — mother gone', desc:'Found near school wall. Around 6 weeks old. Eating solid food now. Vaccinated by local volunteer.', location_name:'Amravati, near Govt School', lat:20.9374, lng:77.7796, animal_type:'Cat', nickname:'RajeshFeeder', created_at: new Date(Date.now()-60*60000).toISOString(), ai_flag:'verified' },
+  { id:'seed-3', type:'feed', title:'Daily feeding spot — volunteers welcome', desc:'We feed 18 strays here every morning 7am. Need more volunteers on Sunday.', location_name:'Wardha, Mahatma Nagar', lat:20.7453, lng:78.5982, animal_type:'Dog', nickname:'WardhaGroup', created_at: new Date(Date.now()-180*60000).toISOString(), ai_flag:'verified' },
+  { id:'seed-4', type:'rip', title:'Moti — beloved street dog of our mohalla', desc:'Moti lived near the old temple for 8 years. She was hit by a speeding vehicle at night. Nobody stopped.', location_name:'Nagpur, Dharampeth', lat:21.1458, lng:79.0882, animal_type:'Dog', nickname:'DharmapethCares', created_at: new Date(Date.now()-2*24*60*60000).toISOString(), ai_flag:'rip', rip_notice:'Due to reckless driving, Moti is no longer with us. Rest in peace, little angel. 🕊️' },
+  { id:'seed-5', type:'sterilize', title:'ABC drive needed — 40+ strays, no municipal action', desc:'Population growing unchecked for 2 years. Municipality not responding. Need NGO or vet team.', location_name:'Akola, Ramdaspeth', lat:20.7096, lng:77.0026, animal_type:'Dog', nickname:'AkolaPets', created_at: new Date(Date.now()-300*60000).toISOString(), ai_flag:'verified' },
+];
+
+// ── INIT ──
+window.onload = () => {
+  renderLangGrids();
+  applyI18n();
+  setTimeout(() => {
+    document.getElementById('loader').style.opacity = '0';
+    setTimeout(() => document.getElementById('loader').style.display = 'none', 800);
+  }, 2200);
+};
+
+// ── ONBOARD — real OTP auth via Supabase ──
+async function completeOnboard() {
+  const answer = document.getElementById('onboard-answer').value.trim();
+  const nick = document.getElementById('onboard-nick').value.trim();
+  const email = document.getElementById('onboard-email').value.trim();
+  if (!answer || !nick || !email) { showToast('Please fill all fields'); return; }
+
+  const btn = document.getElementById('onboard-btn');
+  btn.textContent = 'Sending OTP...'; btn.disabled = true;
+
+  // Send OTP to email via Supabase
+  const { error } = await sb.auth.signInWithOtp({
+    email,
+    options: { shouldCreateUser: true }
+  });
+
+  if (error) {
+    // If Supabase keys not set yet — fall through to demo mode
+    if (SUPABASE_URL === 'YOUR_SUPABASE_URL') {
+      currentUser = { nick, email, lang: currentLang };
+      enterApp(nick);
+      return;
+    }
+    showToast('Could not send OTP. Check your email and try again.');
+    btn.textContent = 'Enter Karuna →'; btn.disabled = false;
+    return;
+  }
+
+  // Show OTP input
+  btn.textContent = 'Enter Karuna →'; btn.disabled = false;
+  showOTPScreen(email, nick, answer);
+}
+
+function showOTPScreen(email, nick, answer) {
+  const box = document.querySelector('.onboard-box');
+  box.innerHTML = `
+    <div class="onboard-paw">📬</div>
+    <div class="onboard-title" style="font-family:'DM Mono';font-size:1rem;letter-spacing:2px;">CHECK YOUR EMAIL</div>
+    <div class="onboard-sub">OTP sent to ${email}</div>
+    <div class="onboard-question" style="font-size:0.9rem;">Enter the 6-digit code we just sent you.</div>
+    <input class="onboard-input" id="otp-input" placeholder="000000" maxlength="6"
+      style="font-size:1.4rem;letter-spacing:8px;text-align:center;">
+    <div class="onboard-privacy">🔒 Code expires in 10 minutes. Your email is never stored in plaintext.</div>
+    <button class="btn-submit" onclick="verifyOTP('${email}','${nick}')">Verify →</button>
+    <div style="margin-top:12px;font-size:0.65rem;color:rgba(245,239,230,0.3);cursor:pointer;"
+      onclick="location.reload()">← Start over</div>
+  `;
+}
+
+async function verifyOTP(email, nick) {
+  const token = document.getElementById('otp-input').value.trim();
+  if (token.length !== 6) { showToast('Enter the 6-digit code'); return; }
+
+  const btn = document.querySelector('.onboard-box .btn-submit');
+  btn.textContent = 'Verifying...'; btn.disabled = true;
+
+  const { error } = await sb.auth.verifyOtp({
+    email, token, type: 'email'
+  });
+
+  if (error) {
+    showToast('Invalid or expired code. Try again.');
+    btn.textContent = 'Verify →'; btn.disabled = false;
+    return;
+  }
+
+  currentUser = { nick, email, lang: currentLang };
+  enterApp(nick);
+}
+
+function enterApp(nick) {
+  document.getElementById('user-nick').textContent = nick;
+  document.getElementById('onboard-overlay').style.display = 'none';
+  document.getElementById('app').classList.add('visible');
+  initMap();
+  loadReports();
+  const t = I18N[currentLang] || I18N.en;
+  showToast(t.welcome(nick));
+}
+
+// ── MAP ──
+function initMap() {
+  map = L.map('leaflet-map', { center:[20.5937,78.9629], zoom:6 });
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution:'© OpenStreetMap contributors', maxZoom:19
+  }).addTo(map);
+  map.on('click', e => {
+    document.getElementById('post-location').value = `${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}`;
+  });
+}
+
+function addMarker(r) {
+  const color = COLORS[r.type], emoji = EMOJIS[r.type];
+  const icon = L.divIcon({
+    className:'',
+    html:`<div style="width:32px;height:32px;border-radius:50% 50% 50% 0;background:${color};transform:rotate(-45deg);border:2px solid rgba(255,255,255,0.3);box-shadow:0 3px 12px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;font-size:13px;"><span style="transform:rotate(45deg)">${emoji}</span></div>`,
+    iconSize:[32,32], iconAnchor:[16,32]
+  });
+  const marker = L.marker([r.lat, r.lng], { icon }).addTo(map);
+  marker.on('click', () => showDetail(r));
+  markers.push(marker);
+}
+
+// ── LOAD REPORTS — from Supabase, fallback to seed data ──
+async function loadReports() {
+  allReports = [...SEED_REPORTS];
+  renderSidebar(); renderMarkers(); updateStats();
+
+  if (SUPABASE_URL === 'YOUR_SUPABASE_URL') return;
+
+  const { data, error } = await sb
+    .from('reports')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(200);
+
+  if (error) { console.error('Load error:', error); return; }
+  if (data && data.length > 0) {
+    allReports = data;
+    renderSidebar(); renderMarkers(); updateStats();
+  }
+}
+
+function timeAgo(isoString) {
+  const diff = Math.floor((Date.now() - new Date(isoString)) / 1000);
+  if (diff < 60) return 'Just now';
+  if (diff < 3600) return `${Math.floor(diff/60)} min ago`;
+  if (diff < 86400) return `${Math.floor(diff/3600)} hr ago`;
+  return `${Math.floor(diff/86400)} days ago`;
+}
+
+function renderSidebar() {
+  const filtered = activeFilter === 'all' ? allReports : allReports.filter(r => r.type === activeFilter);
+  document.getElementById('empty-state').style.display = filtered.length === 0 ? 'block' : 'none';
+  document.getElementById('reports-list').innerHTML = filtered.map(r => `
+    <div class="report-card ${r.type==='rip'?'rip-card':''}" onclick="focusReport(${r.id})">
+      <div class="card-top">
+        <div class="card-type-dot" style="background:${COLORS[r.type]}"></div>
+        <span class="card-type-label" style="color:${COLORS[r.type]}">${r.type}</span>
+        <span class="card-time">${timeAgo(r.created_at)}</span>
+      </div>
+      <div class="card-title">${r.title}</div>
+      <div class="card-location">${r.location_name}</div>
+      ${r.rip_notice ? `<div class="rip-notice">${r.rip_notice}</div>` : ''}
+      <div class="card-footer">
+        <span class="card-anon">@${r.nickname}</span>
+        <span class="card-ai-flag flag-${r.ai_flag}">
+          ${r.ai_flag==='verified'?'✓ AI Verified':r.ai_flag==='review'?'⚠ Under Review':'🕊️ Memorial'}
+        </span>
+      </div>
+    </div>`).join('');
+}
+
+function renderMarkers() {
+  markers.forEach(m => map.removeLayer(m)); markers = [];
+  const filtered = activeFilter==='all' ? allReports : allReports.filter(r=>r.type===activeFilter);
+  filtered.forEach(r => addMarker(r));
+}
+
+function updateStats() {
+  ['rescue','adopt','feed','rip'].forEach(t => {
+    document.getElementById(`stat-${t}`).textContent = allReports.filter(r=>r.type===t).length;
+  });
+}
+
+function filterReports(type, btn) {
+  activeFilter = type;
+  document.querySelectorAll('.cat-pill').forEach(p => p.className = 'cat-pill');
+  btn.classList.add(`active-${type}`);
+  renderSidebar(); renderMarkers();
+}
+
+function focusReport(id) {
+  const r = allReports.find(x=>x.id===id); if (!r) return;
+  map.flyTo([r.lat, r.lng], 13, { duration:1.2 });
+  showDetail(r);
+}
+
+function showDetail(r) {
+  document.getElementById('detail-type').textContent = `${EMOJIS[r.type]} ${r.type.toUpperCase()}`;
+  document.getElementById('detail-type').style.color = COLORS[r.type];
+  document.getElementById('detail-title').textContent = r.title;
+  document.getElementById('detail-desc').textContent = r.rip_notice || r.desc;
+  document.getElementById('detail-meta').textContent = `◎ ${r.location_name} · @${r.nickname} · ${timeAgo(r.created_at)}`;
+  document.getElementById('detail-panel').classList.add('open');
+}
+function closeDetail() { document.getElementById('detail-panel').classList.remove('open'); }
+
+// ── POST ──
+function openPostModal() { document.getElementById('modal-overlay').classList.add('open'); }
+function closePostModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  selectedType = null;
+  document.querySelectorAll('.type-btn').forEach(b => b.className='type-btn');
+  ['post-title','post-desc','post-location'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('ai-preview').classList.remove('visible');
+}
+
+function selectType(type, btn) {
+  selectedType = type;
+  document.querySelectorAll('.type-btn').forEach(b => b.className='type-btn');
+  btn.classList.add(`selected-${type}`);
+  updateAIPreview();
+}
+
+function updateAIPreview() {
+  const title = document.getElementById('post-title').value.trim();
+  const hints = {
+    rescue:'Nearest volunteers will be notified immediately. First-aid guide attached.',
+    adopt:'Post visible to verified adopters in your region.',
+    feed:'Feeding spot mapped. Nearby feeders can coordinate with you.',
+    sterilize:'Report shared with NGOs and authorities in your district.'
+  };
+  if (title.length > 10 && selectedType) {
+    document.getElementById('ai-preview-text').textContent = hints[selectedType] || '';
+    document.getElementById('ai-preview').classList.add('visible');
+  } else {
+    document.getElementById('ai-preview').classList.remove('visible');
+  }
+}
+
+async function submitReport() {
+  const title = document.getElementById('post-title').value.trim();
+  const desc = document.getElementById('post-desc').value.trim();
+  const location = document.getElementById('post-location').value.trim();
+  const animal = document.getElementById('post-animal').value;
+  if (!selectedType || !title || !location) { showToast('Please fill type, title, and location'); return; }
+
+  const btn = document.getElementById('submit-btn');
+  btn.textContent = 'Submitting...'; btn.disabled = true;
+
+  // Parse coordinates if typed as lat,lng
+  let lat = 19.0 + Math.random()*3, lng = 75.0 + Math.random()*5;
+  const m = location.match(/(-?\d+\.\d+),\s*(-?\d+\.\d+)/);
+  if (m) { lat = parseFloat(m[1]); lng = parseFloat(m[2]); }
+
+  const report = {
+    type: selectedType,
+    title,
+    description: desc || null,
+    location_name: location,
+    lat, lng,
+    animal_type: animal || 'Animal',
+    nickname: currentUser.nick,
+    ai_flag: 'verified',
+    rip_notice: selectedType === 'rip'
+      ? `${title} is no longer with us. Rest in peace, little angel. 🕊️`
+      : null
+  };
+
+  // Save to Supabase if connected, otherwise local only
+  if (SUPABASE_URL !== 'YOUR_SUPABASE_URL') {
+    const { data, error } = await sb.from('reports').insert([report]).select().single();
+    if (error) {
+      showToast('Could not save report. Try again.');
+      btn.textContent = (I18N[currentLang]||I18N.en).submitReport; btn.disabled = false;
+      return;
+    }
+    allReports.unshift(data);
+  } else {
+    // Demo mode — local only
+    allReports.unshift({ ...report, id: Date.now(), created_at: new Date().toISOString() });
+  }
+
+  renderSidebar(); renderMarkers(); updateStats();
+  map.flyTo([lat, lng], 12, { duration: 1.5 });
+  showDetail(allReports[0]);
+  closePostModal();
+  btn.textContent = (I18N[currentLang]||I18N.en).submitReport; btn.disabled = false;
+  showToast((I18N[currentLang]||I18N.en).submitted);
+}
+
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3200);
+}
+</script>
+</body>
+</html>

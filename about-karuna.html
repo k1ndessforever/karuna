@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About Karuna - करुणा</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Marathi:ital@0;1&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #0e0c08;
+  --paper: #f2ece0;
+  --bark: #2d1f0e;
+  --soil: #1a1208;
+  --sage: #5a7a4a;
+  --sage-light: #8aab7a;
+  --dusk: #c4956a;
+  --clay: #d4a87a;
+  --ash: #9a9080;
+  --rescue: #c04830;
+  --rip: #7a6a8e;
+  --honest-red: #b03020;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Crimson Pro', serif;
+  font-size: 1.15rem;
+  line-height: 1.8;
+  cursor: default;
+}
+
+/* grain overlay */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 9999; opacity: 0.5;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(242,236,224,0.92);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(14,12,8,0.1);
+  padding: 0 40px;
+  height: 52px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.nav-brand {
+  font-family: 'Tiro Devanagari Marathi', serif;
+  font-size: 1.3rem;
+  color: var(--sage);
+  text-decoration: none;
+  display: flex; align-items: baseline; gap: 8px;
+}
+.nav-brand span { font-family: 'DM Mono'; font-size: 0.6rem; color: var(--ash); letter-spacing: 3px; text-transform: uppercase; }
+.nav-links { display: flex; gap: 28px; }
+.nav-links a {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--ash);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--ink); }
+.nav-back {
+  font-family: 'DM Mono'; font-size: 0.65rem; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--sage); text-decoration: none;
+  border: 1px solid var(--sage); padding: 5px 12px; border-radius: 4px;
+  transition: all 0.2s;
+}
+.nav-back:hover { background: var(--sage); color: var(--paper); }
+
+/* ── LANG BAR ── */
+#lang-bar {
+  position: fixed; top: 52px; left: 0; right: 0; z-index: 99;
+  background: var(--bark);
+  padding: 8px 40px;
+  display: flex; align-items: center; gap: 8px; overflow-x: auto;
+  scrollbar-width: none;
+}
+#lang-bar::-webkit-scrollbar { display: none; }
+.lang-pill {
+  padding: 3px 12px; border-radius: 100px;
+  font-family: 'DM Mono'; font-size: 0.6rem; letter-spacing: 1px;
+  border: 1px solid rgba(242,236,224,0.15);
+  color: rgba(242,236,224,0.45);
+  cursor: pointer; white-space: nowrap;
+  transition: all 0.2s; background: transparent;
+}
+.lang-pill:hover { color: rgba(242,236,224,0.8); }
+.lang-pill.active { background: rgba(90,122,74,0.3); border-color: var(--sage-light); color: var(--sage-light); }
+
+/* ── LAYOUT ── */
+main { padding-top: 96px; }
+
+/* ── SECTIONS ── */
+section {
+  padding: 80px 0;
+  border-bottom: 1px solid rgba(14,12,8,0.08);
+}
+.container { max-width: 760px; margin: 0 auto; padding: 0 40px; }
+.container-wide { max-width: 1000px; margin: 0 auto; padding: 0 40px; }
+
+/* Section labels */
+.section-eyebrow {
+  font-family: 'DM Mono'; font-size: 0.6rem; letter-spacing: 4px;
+  text-transform: uppercase; color: var(--ash);
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 28px;
+}
+.section-eyebrow::after { content: ''; flex: 1; height: 1px; background: rgba(14,12,8,0.1); }
+
+/* ── HERO ── */
+#hero {
+  background: var(--soil);
+  color: var(--paper);
+  padding: 100px 0 80px;
+  border-bottom: none;
+  position: relative; overflow: hidden;
+}
+#hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 20% 50%, rgba(90,122,74,0.15) 0%, transparent 60%),
+              radial-gradient(ellipse at 80% 20%, rgba(196,149,106,0.08) 0%, transparent 50%);
+}
+.hero-inner { position: relative; z-index: 1; }
+.hero-devanagari {
+  font-family: 'Tiro Devanagari Marathi', serif;
+  font-size: clamp(4rem, 10vw, 8rem);
+  color: var(--sage-light);
+  line-height: 1;
+  margin-bottom: 12px;
+  opacity: 0; animation: riseIn 1s ease 0.2s forwards;
+}
+.hero-tagline {
+  font-family: 'Crimson Pro', serif;
+  font-style: italic;
+  font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+  color: var(--clay);
+  margin-bottom: 40px;
+  opacity: 0; animation: riseIn 1s ease 0.5s forwards;
+}
+.hero-statement {
+  font-size: 1rem;
+  color: rgba(242,236,224,0.5);
+  font-family: 'DM Mono';
+  letter-spacing: 1px;
+  line-height: 1.8;
+  max-width: 560px;
+  opacity: 0; animation: riseIn 1s ease 0.8s forwards;
+}
+.hero-statement strong { color: var(--sage-light); }
+
+/* ── BRUTAL TRANSPARENCY ── */
+#transparency { background: var(--paper); }
+
+.brutal-box {
+  border: 2px solid var(--ink);
+  border-radius: 2px;
+  padding: 28px 32px;
+  margin-bottom: 24px;
+  position: relative;
+}
+.brutal-box-label {
+  position: absolute; top: -10px; left: 20px;
+  background: var(--paper);
+  padding: 0 8px;
+  font-family: 'DM Mono'; font-size: 0.58rem; letter-spacing: 3px;
+  text-transform: uppercase; color: var(--ash);
+}
+.brutal-box.good { border-color: var(--sage); }
+.brutal-box.good .brutal-box-label { color: var(--sage); }
+.brutal-box.bad { border-color: var(--honest-red); }
+.brutal-box.bad .brutal-box-label { color: var(--honest-red); }
+.brutal-box.neutral { border-color: var(--dusk); }
+.brutal-box.neutral .brutal-box-label { color: var(--dusk); }
+
+.truth-row {
+  display: flex; gap: 16px; margin-bottom: 12px;
+  align-items: flex-start; font-size: 1rem;
+}
+.truth-row:last-child { margin-bottom: 0; }
+.truth-icon { flex-shrink: 0; margin-top: 3px; }
+.truth-text { line-height: 1.6; }
+.truth-text strong { font-weight: 600; }
+
+h2 {
+  font-family: 'Crimson Pro'; font-size: 2.2rem; font-weight: 300;
+  line-height: 1.2; margin-bottom: 20px; letter-spacing: -0.5px;
+}
+h3 {
+  font-family: 'Crimson Pro'; font-size: 1.4rem; font-weight: 600;
+  margin-bottom: 12px; color: var(--bark);
+}
+p { margin-bottom: 16px; color: rgba(14,12,8,0.8); }
+p:last-child { margin-bottom: 0; }
+
+/* Cost table */
+.cost-table {
+  width: 100%; border-collapse: collapse; margin: 20px 0;
+  font-size: 0.95rem;
+}
+.cost-table th {
+  font-family: 'DM Mono'; font-size: 0.6rem; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--ash);
+  text-align: left; padding: 8px 12px;
+  border-bottom: 2px solid var(--ink);
+}
+.cost-table td { padding: 10px 12px; border-bottom: 1px solid rgba(14,12,8,0.08); vertical-align: top; }
+.cost-table tr:last-child td { border-bottom: none; }
+.cost-free { color: var(--sage); font-family: 'DM Mono'; font-size: 0.85rem; font-weight: 500; }
+.cost-paid { color: var(--honest-red); font-family: 'DM Mono'; font-size: 0.85rem; }
+
+/* ── SECURITY ── */
+#security { background: #f7f0e4; }
+
+.security-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+  margin-top: 28px;
+}
+.security-card {
+  padding: 22px 24px;
+  border-radius: 4px;
+  background: var(--paper);
+  border: 1px solid rgba(14,12,8,0.08);
+}
+.security-card-icon { font-size: 1.5rem; margin-bottom: 10px; }
+.security-card h4 {
+  font-family: 'DM Mono'; font-size: 0.7rem; letter-spacing: 2px;
+  text-transform: uppercase; margin-bottom: 8px; color: var(--bark);
+}
+.security-card p { font-size: 0.92rem; color: rgba(14,12,8,0.65); margin: 0; line-height: 1.6; }
+
+.threat-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 0; border-bottom: 1px solid rgba(14,12,8,0.07);
+  font-size: 0.95rem;
+}
+.threat-row:last-child { border-bottom: none; }
+.threat-name { color: var(--ink); }
+.threat-status {
+  font-family: 'DM Mono'; font-size: 0.65rem; letter-spacing: 1px;
+  padding: 3px 10px; border-radius: 100px;
+}
+.status-protected { background: rgba(90,122,74,0.12); color: var(--sage); }
+.status-partial { background: rgba(196,149,106,0.15); color: #a07030; }
+.status-honest { background: rgba(176,48,32,0.1); color: var(--honest-red); }
+
+/* ── ABOUT MULTILANG ── */
+#about-lang { background: var(--soil); color: var(--paper); }
+#about-lang h2 { color: var(--sage-light); }
+
+.lang-about-tabs {
+  display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 32px;
+}
+.lang-tab {
+  padding: 5px 14px; border-radius: 100px;
+  font-family: 'DM Mono'; font-size: 0.62rem; letter-spacing: 1px;
+  border: 1px solid rgba(242,236,224,0.15);
+  color: rgba(242,236,224,0.4);
+  cursor: pointer; background: transparent;
+  transition: all 0.2s;
+}
+.lang-tab:hover { color: rgba(242,236,224,0.8); }
+.lang-tab.active { background: rgba(90,122,74,0.25); border-color: var(--sage-light); color: var(--sage-light); }
+
+.about-content { display: none; animation: fadeIn 0.4s ease; }
+.about-content.active { display: block; }
+
+.about-content h3 {
+  font-family: 'Tiro Devanagari Marathi', serif;
+  font-size: 1.6rem; font-weight: 400;
+  color: var(--clay); margin-bottom: 16px;
+}
+.about-content p {
+  color: rgba(242,236,224,0.7); font-size: 1.05rem; line-height: 1.9;
+}
+.about-content .about-pillars {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-top: 24px;
+}
+.pillar {
+  padding: 16px; border: 1px solid rgba(242,236,224,0.1); border-radius: 4px;
+  text-align: center;
+}
+.pillar-icon { font-size: 1.4rem; margin-bottom: 6px; }
+.pillar-name {
+  font-family: 'DM Mono'; font-size: 0.62rem; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--sage-light);
+}
+
+/* ── DONATION ── */
+#donation { background: var(--paper); }
+
+.donation-honest-note {
+  background: rgba(90,122,74,0.06);
+  border-left: 3px solid var(--sage);
+  padding: 16px 20px; margin-bottom: 28px;
+  font-style: italic; font-size: 1rem;
+  color: rgba(14,12,8,0.65);
+  border-radius: 0 4px 4px 0;
+}
+
+.donation-card {
+  border: 2px solid var(--ink);
+  border-radius: 4px;
+  padding: 36px;
+  text-align: center;
+  max-width: 400px;
+  margin: 0 auto;
+  position: relative;
+}
+.donation-card-label {
+  position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+  background: var(--paper); padding: 0 16px;
+  font-family: 'DM Mono'; font-size: 0.58rem; letter-spacing: 3px;
+  text-transform: uppercase; color: var(--ash); white-space: nowrap;
+}
+.donation-paw { font-size: 2.5rem; margin-bottom: 12px; }
+.donation-title {
+  font-family: 'Tiro Devanagari Marathi', serif;
+  font-size: 1.6rem; color: var(--sage); margin-bottom: 6px;
+}
+.donation-sub {
+  font-family: 'DM Mono'; font-size: 0.65rem; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--ash); margin-bottom: 20px;
+}
+.donation-desc {
+  font-size: 0.95rem; color: rgba(14,12,8,0.6);
+  line-height: 1.7; margin-bottom: 24px;
+}
+.gpay-btn {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--ink); color: var(--paper);
+  padding: 12px 28px; border-radius: 4px;
+  text-decoration: none; font-family: 'DM Mono';
+  font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase;
+  transition: all 0.2s; border: 2px solid var(--ink);
+}
+.gpay-btn:hover { background: transparent; color: var(--ink); }
+.donation-disclaimer {
+  margin-top: 16px; font-size: 0.78rem;
+  color: rgba(14,12,8,0.35); font-style: italic;
+}
+
+.cost-breakdown {
+  margin-top: 40px; padding: 24px;
+  background: rgba(14,12,8,0.03); border-radius: 4px;
+}
+.cost-breakdown h4 {
+  font-family: 'DM Mono'; font-size: 0.65rem; letter-spacing: 3px;
+  text-transform: uppercase; color: var(--ash); margin-bottom: 16px;
+}
+.cost-line {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 0; border-bottom: 1px solid rgba(14,12,8,0.06);
+  font-size: 0.9rem;
+}
+.cost-line:last-child { border-bottom: none; }
+.cost-line-label { color: rgba(14,12,8,0.6); }
+.cost-line-value { font-family: 'DM Mono'; font-size: 0.8rem; color: var(--sage); }
+.cost-line-value.zero { color: var(--ash); }
+.cost-total {
+  display: flex; justify-content: space-between;
+  padding-top: 14px; margin-top: 4px;
+  border-top: 2px solid var(--ink);
+  font-weight: 600; font-size: 1rem;
+}
+.cost-total-val { font-family: 'DM Mono'; color: var(--sage); }
+
+/* ── CREDITS ── */
+#credits {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 100px 0;
+  border-bottom: none;
+}
+
+.credits-quote {
+  font-family: 'Tiro Devanagari Marathi', serif;
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  color: var(--sage-light);
+  line-height: 1.3;
+  margin-bottom: 8px;
+  font-weight: 400;
+}
+.credits-quote-en {
+  font-family: 'Crimson Pro'; font-style: italic;
+  font-size: clamp(1rem, 2vw, 1.4rem);
+  color: var(--clay); margin-bottom: 48px;
+}
+
+.manifesto {
+  background: rgba(242,236,224,0.04);
+  border: 1px solid rgba(242,236,224,0.1);
+  border-radius: 4px; padding: 32px 36px; margin-bottom: 40px;
+}
+.manifesto p {
+  color: rgba(242,236,224,0.65);
+  font-size: 1.05rem; line-height: 1.9;
+}
+.manifesto p strong { color: var(--sage-light); font-weight: 600; }
+.manifesto p em { color: var(--clay); font-style: italic; }
+
+.open-source-box {
+  border: 1px solid rgba(90,122,74,0.3);
+  border-radius: 4px; padding: 24px 28px; margin-bottom: 32px;
+  background: rgba(90,122,74,0.05);
+}
+.open-source-box h4 {
+  font-family: 'DM Mono'; font-size: 0.65rem; letter-spacing: 3px;
+  text-transform: uppercase; color: var(--sage-light); margin-bottom: 12px;
+}
+.open-source-box p { color: rgba(242,236,224,0.55); font-size: 0.95rem; margin: 0; line-height: 1.7; }
+.open-source-box code {
+  font-family: 'DM Mono'; font-size: 0.82rem;
+  background: rgba(242,236,224,0.07); padding: 2px 8px; border-radius: 3px;
+  color: var(--sage-light);
+}
+
+.built-by {
+  display: flex; align-items: center; gap: 16px;
+  padding-top: 40px; border-top: 1px solid rgba(242,236,224,0.08);
+}
+.built-by-paw { font-size: 2rem; }
+.built-by-text { font-size: 0.85rem; color: rgba(242,236,224,0.3); line-height: 1.6; }
+.built-by-text strong { color: rgba(242,236,224,0.6); }
+
+.license-line {
+  font-family: 'DM Mono'; font-size: 0.62rem; letter-spacing: 2px;
+  color: rgba(242,236,224,0.2); text-transform: uppercase; margin-top: 32px;
+}
+
+/* ── ANIMATIONS ── */
+@keyframes riseIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; } to { opacity: 1; }
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 640px) {
+  .container, .container-wide { padding: 0 20px; }
+  nav { padding: 0 20px; }
+  #lang-bar { padding: 8px 20px; }
+  .security-grid { grid-template-columns: 1fr; }
+  .about-content .about-pillars { grid-template-columns: 1fr; }
+  .nav-links { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-brand">करुणा <span>Karuna</span></a>
+  <div class="nav-links">
+    <a href="#transparency">Transparency</a>
+    <a href="#security">Security</a>
+    <a href="#about-lang">About</a>
+    <a href="#donation">Support</a>
+    <a href="#credits">Credits</a>
+  </div>
+  <a href="index.html" class="nav-back">← Back to Map</a>
+</nav>
+
+<!-- LANGUAGE BAR -->
+<div id="lang-bar"></div>
+
+<!-- MAIN -->
+<main>
+
+<!-- ── HERO ── -->
+<section id="hero">
+  <div class="container hero-inner">
+    <div class="hero-devanagari">करुणा</div>
+    <div class="hero-tagline">"We don't beg for sympathy it's within us."</div>
+    <div class="hero-statement">
+      This page exists because <strong>you deserve to know everything</strong> —
+      who built this, how it works, what it costs, where your data goes,
+      who can take it forward, and why none of this is about money.
+    </div>
+  </div>
+</section>
+
+<!-- ── BRUTAL TRANSPARENCY ── -->
+<section id="transparency">
+  <div class="container">
+    <div class="section-eyebrow">01 Brutal Transparency</div>
+    <h2>Everything we do.<br>Nothing hidden.</h2>
+
+    <div class="brutal-box good">
+      <div class="brutal-box-label">What we collect</div>
+      <div class="truth-row"><span class="truth-icon">✅</span><span class="truth-text"><strong>Your email address</strong> used only to send an OTP. Never stored in plaintext. Never shared. Never used to contact you.</span></div>
+      <div class="truth-row"><span class="truth-icon">✅</span><span class="truth-text"><strong>Your nickname</strong> chosen by you, anonymous. Could be "WardhaFeeder" or "Anonymous123". We don't care who you really are.</span></div>
+      <div class="truth-row"><span class="truth-icon">✅</span><span class="truth-text"><strong>Your report content</strong> the animal, location text, photo if added. This is the whole point. It lives in the database so others can help.</span></div>
+      <div class="truth-row"><span class="truth-icon">✅</span><span class="truth-text"><strong>Timestamp and language preference</strong> so we know when posts were made and what language to show them in.</span></div>
+    </div>
+
+    <div class="brutal-box bad">
+      <div class="brutal-box-label">What we never collect</div>
+      <div class="truth-row"><span class="truth-icon">🚫</span><span class="truth-text"><strong>Phone number</strong> never asked, never needed.</span></div>
+      <div class="truth-row"><span class="truth-icon">🚫</span><span class="truth-text"><strong>Real name</strong> not now, not ever.</span></div>
+      <div class="truth-row"><span class="truth-icon">🚫</span><span class="truth-text"><strong>Device fingerprint, browser info, IP address</strong> we do not run any tracking scripts.</span></div>
+      <div class="truth-row"><span class="truth-icon">🚫</span><span class="truth-text"><strong>Location from your GPS</strong> you type your location in words. We never ask your device for coordinates.</span></div>
+      <div class="truth-row"><span class="truth-icon">🚫</span><span class="truth-text"><strong>Behavioural data</strong> what you clicked, how long you stayed, what you searched. None of it. Ever.</span></div>
+      <div class="truth-row"><span class="truth-icon">🚫</span><span class="truth-text"><strong>Google Analytics, Meta Pixel, or any ad tracking</strong> not installed. Not planned. Not negotiable.</span></div>
+    </div>
+
+    <div class="brutal-box neutral">
+      <div class="brutal-box-label">Honest limitations</div>
+      <div class="truth-row"><span class="truth-icon">⚠️</span><span class="truth-text"><strong>Supabase stores your email</strong> it is a third-party service based in the USA. Their privacy policy applies. We use the minimum data possible with them.</span></div>
+      <div class="truth-row"><span class="truth-icon">⚠️</span><span class="truth-text"><strong>Vercel hosts our code</strong> they may log request metadata (not content) as part of normal server operation.</span></div>
+      <div class="truth-row"><span class="truth-icon">⚠️</span><span class="truth-text"><strong>OpenStreetMap tiles</strong> the map images load from OSM servers. OSM may log the tile requests. No personal data is attached to these.</span></div>
+      <div class="truth-row"><span class="truth-icon">⚠️</span><span class="truth-text"><strong>AI analysis</strong> when you post a report, the text is sent to Anthropic's Claude API for fraud checking. Anthropic's data policy applies to this processing.</span></div>
+    </div>
+
+    <h3 style="margin-top:40px;">What happens when users grow honest cost reality</h3>
+    <p>Right now Karuna runs on free tiers. Here is exactly when and what costs appear:</p>
+
+    <table class="cost-table">
+      <tr><th>Service</th><th>Free Until</th><th>Cost After</th></tr>
+      <tr><td>Vercel (hosting)</td><td>Unlimited hobby projects</td><td class="cost-free">~₹0 for years</td></tr>
+      <tr><td>Supabase (database)</td><td>50,000 rows, 500MB</td><td class="cost-paid">~$25/month after</td></tr>
+      <tr><td>Supabase Auth</td><td>Unlimited users</td><td class="cost-free">Free forever</td></tr>
+      <tr><td>OpenStreetMap</td><td>Unlimited map views</td><td class="cost-free">Free forever</td></tr>
+      <tr><td>Claude AI API</td><td>~500 free test calls</td><td class="cost-paid">~₹0.10 per report</td></tr>
+      <tr><td>Domain (karuna.in)</td><td>—</td><td class="cost-paid">~₹800/year</td></tr>
+    </table>
+
+    <p style="font-size:0.9rem; color:var(--ash); margin-top:8px;">
+      At 100 active users posting 5 reports each per month = 500 reports = roughly ₹50 in AI costs + ₹0 everything else. At 5,000 users we hit Supabase limits and need ~$25/month. That is the honest ceiling before costs matter.
+    </p>
+  </div>
+</section>
+
+<!-- ── SECURITY ── -->
+<section id="security">
+  <div class="container">
+    <div class="section-eyebrow">02 — Security</div>
+    <h2>Are you safe here?<br>Honest answer.</h2>
+
+    <p>No platform is 100% safe. Anyone who tells you otherwise is lying. Here is what we do, what we don't do, and what the real risks are.</p>
+
+    <div class="security-grid">
+      <div class="security-card">
+        <div class="security-card-icon">🔒</div>
+        <h4>HTTPS Everywhere</h4>
+        <p>All traffic between you and Karuna is encrypted. Nobody in the middle can read what you post or receive.</p>
+      </div>
+      <div class="security-card">
+        <div class="security-card-icon">👤</div>
+        <h4>Anonymous by Default</h4>
+        <p>Your real identity is never stored. If Karuna's database were breached, attackers would find nicknames and hashed emails — not names or phone numbers.</p>
+      </div>
+      <div class="security-card">
+        <div class="security-card-icon">🗺️</div>
+        <h4>No GPS Access</h4>
+        <p>We never request your device location. Location is typed text only. Even if compromised, nobody can pinpoint your physical position from our data.</p>
+      </div>
+      <div class="security-card">
+        <div class="security-card-icon">🤖</div>
+        <h4>AI Fraud Detection</h4>
+        <p>Every post is reviewed by AI before going live. Fake, abusive, or suspicious posts are held for mod review — not published automatically.</p>
+      </div>
+      <div class="security-card">
+        <div class="security-card-icon">🛡️</div>
+        <h4>No Password Storage</h4>
+        <p>We use OTP only. There is no password to steal. Even if our auth system were compromised, there are no password hashes to crack.</p>
+      </div>
+      <div class="security-card">
+        <div class="security-card-icon">📂</div>
+        <h4>Open Source Code</h4>
+        <p>Every line of Karuna's code is public on GitHub. Anyone can audit it. Security through transparency, not obscurity.</p>
+      </div>
+    </div>
+
+    <h3 style="margin-top:40px;">Threat Reality Check</h3>
+    <div style="margin-top:16px;">
+      <div class="threat-row"><span class="threat-name">Someone reads your posts</span><span class="threat-status status-honest">By design — posts are public</span></div>
+      <div class="threat-row"><span class="threat-name">Someone traces your real identity</span><span class="threat-status status-protected">Protected — nickname only</span></div>
+      <div class="threat-row"><span class="threat-name">Database breach exposes your email</span><span class="threat-status status-partial">Partial — hashed, not plaintext</span></div>
+      <div class="threat-row"><span class="threat-name">Fake/spam reports flooding map</span><span class="threat-status status-protected">Protected — AI + mod review</span></div>
+      <div class="threat-row"><span class="threat-name">Your GPS location leaked</span><span class="threat-status status-protected">Protected — never collected</span></div>
+      <div class="threat-row"><span class="threat-name">Platform goes offline</span><span class="threat-status status-honest">Honest — possible, see Credits</span></div>
+      <div class="threat-row"><span class="threat-name">Someone copies & misuses the platform</span><span class="threat-status status-honest">Honest — MIT license, we accept this</span></div>
+    </div>
+
+    <div class="brutal-box neutral" style="margin-top:32px;">
+      <div class="brutal-box-label">The one rule for staying safe on Karuna</div>
+      <div class="truth-row"><span class="truth-icon">💡</span><span class="truth-text">Never post your real name, phone number, or home address in a report. The platform protects your identity — but only if you do too. Write locations as landmarks, not GPS pins to your house.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ABOUT IN ALL LANGUAGES ── -->
+<section id="about-lang">
+  <div class="container">
+    <div class="section-eyebrow" style="color:rgba(242,236,224,0.3);">03 — About Karuna</div>
+    <h2>Who we are.<br>In your language.</h2>
+
+    <div class="lang-about-tabs" id="about-tabs"></div>
+    <div id="about-contents"></div>
+  </div>
+</section>
+
+<!-- ── DONATION ── -->
+<section id="donation">
+  <div class="container">
+    <div class="section-eyebrow">04 — Support</div>
+    <h2>If you want to help<br>keep the lights on.</h2>
+
+    <div class="donation-honest-note">
+      We are not a registered NGO. We are not a company. We are one person
+      who cares about animals and built something honest.
+      This is not a fundraiser. There is no goal. There is no pressure.
+      If the platform has ever helped an animal near you and you have
+      something to spare this is where it goes. Directly to server costs.
+      Nothing else.
+    </div>
+
+    <div class="donation-card">
+      <div class="donation-card-label">Buy Karuna a coffee ☕</div>
+      <div class="donation-paw">🐾</div>
+      <div class="donation-title">करुणा</div>
+      <div class="donation-sub">Zero pressure · Zero guilt</div>
+      <div class="donation-desc">
+        Every rupee goes directly toward keeping Karuna alive —
+        database hosting, domain renewal, AI API costs for processing rescue reports.
+        You will receive no receipt, no thank-you email, no karma points.
+        Just the knowledge that a stray somewhere got help because the platform stayed online.
+      </div>
+            <a href="upi://pay?pa=yash.pandit.dev01@oksbi&pn=Karuna+Animal+Welfare&cu=INR" class="gpay-btn">
+            ☕ Support via GPay / UPI
+            </a>
+              <div class="donation-disclaimer">
+              UPI ID: <strong>yash.pandit.dev01@oksbi</strong><br>
+              No minimum. No maximum. No obligation.
+      </div>
+
+    <div class="cost-breakdown">
+      <h4>Where your money actually goes — live breakdown</h4>
+      <div class="cost-line"><span class="cost-line-label">Vercel hosting</span><span class="cost-line-value zero">₹0 / month</span></div>
+      <div class="cost-line"><span class="cost-line-label">OpenStreetMap tiles</span><span class="cost-line-value zero">₹0 / month</span></div>
+      <div class="cost-line"><span class="cost-line-label">Supabase database (current)</span><span class="cost-line-value zero">₹0 / month</span></div>
+      <div class="cost-line"><span class="cost-line-label">AI (Claude API) per report</span><span class="cost-line-value">~₹0.10 per report</span></div>
+      <div class="cost-line"><span class="cost-line-label">Domain (karuna.in)</span><span class="cost-line-value">~₹67 / month</span></div>
+      <div class="cost-line"><span class="cost-line-label">Developer salary</span><span class="cost-line-value zero">₹0 — volunteer built</span></div>
+      <div class="cost-total"><span>Current monthly cost</span><span class="cost-total-val">~₹67–200</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CREDITS ── -->
+<section id="credits">
+  <div class="container">
+    <div class="section-eyebrow" style="color:rgba(242,236,224,0.2);">05 — Credits & Legacy</div>
+
+    <div class="credits-quote">एक माणूस मरतो,<br>पण त्याच्या कल्पना मरत नाहीत.</div>
+    <div class="credits-quote-en">"A man will die — but not his ideas."</div>
+
+    <div class="manifesto">
+      <p>
+        Karuna was built by <strong>one person</strong> from rural Maharashtra who was tired of seeing animals suffer
+        while the world scrolled past. No company. No funding. No team. Just anger, care, and a laptop.
+      </p>
+      <p>
+        If this platform ever goes dark if the domain expires, if the database runs out,
+        if the person who built this can no longer maintain it
+        <strong>the code lives on GitHub, permanently, for free, under the MIT license.</strong>
+      </p>
+      <p>
+        <em>You do not need permission to continue this work.</em>
+        You do not need to credit anyone. You do not need to ask.
+        The only thing we ask not legally, just humanly is that
+        <strong>you keep it honest, keep it private, keep it for animal kind and mankind as well although the project is based on animal saftey and regards.</strong>
+        Don't monetize it. Don't sell the data. Don't put ads on it.
+        Don't turn it into something that benefits humans at the expense of the creatures it was built for.
+      </p>
+      <p>
+        Transparency and legitimacy are not features. <em>They are the foundation.</em>
+        If you rebuild this, rebuild it on that same foundation.
+      </p>
+    </div>
+
+    <div class="open-source-box">
+      <h4>To whoever continues this</h4>
+      <p>
+        The full source code is at <code>github.com/karuna-welfare/karuna</code>.
+        Fork it. Improve it. Translate it into languages we missed.
+        Add features we couldn't build. Fix bugs we left behind.
+        Deploy it in your city, your country, your language.
+        <br><br>
+        License: <code>MIT</code> no restrictions. Use it freely.
+        No permission needed.
+        <br><br>
+        The animals cannot wait.
+      </p>
+    </div>
+
+    <div class="built-by">
+      <div class="built-by-paw">🐾</div>
+      <div class="built-by-text">
+        <strong>Built with honesty. Powered by compassion.</strong><br>
+        For every animal overlooked, ignored, and forgotten.<br>
+        For every volunteer working alone at midnight with no support.<br>
+        For the ones who didn't make it you are remembered here.
+        You didn't came here, destiny has brought you here. stay strong!!
+      </div>
+    </div>
+
+    <div class="license-line">
+      MIT License · Open Source · No Rights Reserved · karuna-welfare/karuna
+      Remember kindess is not weak, you are just overpowered. don't waste your potential, you got this.
+    </div>
+  </div>
+</section>
+
+</main>
+
+<script>
+// ── LANGUAGE DATA ──
+const LANGUAGES = [
+  { code:'en', label:'English',   native:'English' },
+  { code:'hi', label:'हिन्दी',    native:'हिन्दी' },
+  { code:'mr', label:'मराठी',     native:'मराठी' },
+  { code:'ur', label:'اردو',      native:'اردو' },
+  { code:'es', label:'Español',   native:'Español' },
+  { code:'fr', label:'Français',  native:'Français' },
+  { code:'de', label:'Deutsch',   native:'Deutsch' },
+  { code:'bn', label:'বাংলা',     native:'বাংলা' },
+  { code:'ta', label:'தமிழ்',    native:'தமிழ்' },
+  { code:'te', label:'తెలుగు',   native:'తెలుగు' },
+  { code:'ar', label:'العربية',   native:'العربية' },
+  { code:'pt', label:'Português', native:'Português' },
+];
+
+const ABOUT_CONTENT = {
+  en: {
+    title: 'What is Karuna?',
+    body: `Karuna (करुणा) means compassion in Sanskrit and Marathi. It is an open-source, privacy-first animal welfare platform built for rural India — and anyone, anywhere, who cares about animals that cannot speak for themselves.
+
+We built this because in villages across Maharashtra, an injured dog on the highway has nobody to call. A stray cat having kittens in the rain has no shelter. A cow abandoned with a wound has no vet. And the few people who do care — they are working alone, exhausted, invisible.
+
+Karuna is the connective tissue. A place where the person who found the injured dog can reach the volunteer three streets away. Where someone who wants to adopt can find the animal waiting. Where every feeding spot is mapped so nobody doubles up. Where every sterilization drive can be organized. And where every animal that didn't make it is remembered — honestly, with dignity.`,
+    pillars: [
+      { icon: '🔒', name: 'Privacy' },
+      { icon: '🌿', name: 'Transparency' },
+      { icon: '🤝', name: 'Community' },
+    ]
+  },
+  hi: {
+    title: 'करुणा क्या है?',
+    body: `करुणा एक ओपन-सोर्स, प्राइवेसी-फर्स्ट पशु कल्याण मंच है — ग्रामीण भारत के लिए बनाया गया, और उन सभी के लिए जो बेज़ुबान जानवरों की परवाह करते हैं।
+
+हमने यह इसलिए बनाया क्योंकि गाँवों में एक घायल कुत्ते के लिए कोई नहीं होता। एक बेसहारा बिल्ली के लिए कोई आश्रय नहीं। एक घायल गाय के लिए कोई डॉक्टर नहीं। और जो लोग परवाह करते हैं — वे अकेले काम कर रहे हैं, थके हुए, अदृश्य।
+
+करुणा वह कड़ी है जो उन्हें जोड़ती है। जहाँ घायल जानवर मिलने पर पास का स्वयंसेवक तुरंत पहुँच सके। जहाँ हर जानवर जो नहीं बचा — उसे इज़्ज़त से याद किया जाए।`,
+    pillars: [
+      { icon: '🔒', name: 'गोपनीयता' },
+      { icon: '🌿', name: 'पारदर्शिता' },
+      { icon: '🤝', name: 'समुदाय' },
+    ]
+  },
+  mr: {
+    title: 'करुणा म्हणजे काय?',
+    body: `करुणा हे एक ओपन-सोर्स, गोपनीयता-प्रथम प्राणी कल्याण व्यासपीठ आहे — ग्रामीण महाराष्ट्रासाठी बांधले गेले आहे, आणि जगभरातील त्या सर्वांसाठी जे बोलू न शकणाऱ्या प्राण्यांची काळजी करतात.
+
+महाराष्ट्रातील गावांमध्ये महामार्गावर जखमी कुत्र्यासाठी कोणाला फोन करावा हे कोणाला माहित नसते. पावसात पिल्ले जन्माला घालणाऱ्या भटक्या मांजरीसाठी निवारा नाही. जखमी गायीसाठी कोणी पशुवैद्य नाही. आणि जे काळजी घेतात — ते एकटे काम करत आहेत, थकलेले, अदृश्य.
+
+करुणा ही जोडणारी कड आहे. जिथे जखमी प्राणी सापडल्यावर जवळचा स्वयंसेवक त्वरित पोहोचू शकतो. जिथे न वाचलेला प्रत्येक प्राणी प्रामाणिकपणे, सन्मानाने आठवला जातो.`,
+    pillars: [
+      { icon: '🔒', name: 'गोपनीयता' },
+      { icon: '🌿', name: 'पारदर्शकता' },
+      { icon: '🤝', name: 'समुदाय' },
+    ]
+  },
+  ur: {
+    title: 'کرونا کیا ہے؟',
+    body: `کرونا ایک اوپن سورس، پرائیویسی-فرسٹ جانور فلاح و بہبود پلیٹ فارم ہے — دیہی ہندوستان کے لیے بنایا گیا، اور ان سب کے لیے جو بے زبان جانوروں کی فکر کرتے ہیں۔
+
+ہم نے یہ اس لیے بنایا کیونکہ گاؤں میں ایک زخمی کتے کے لیے کوئی نہیں ہوتا۔ ایک بے سہارا بلی کے لیے کوئی پناہ نہیں۔ ایک زخمی گائے کے لیے کوئی ڈاکٹر نہیں۔ اور جو لوگ فکر کرتے ہیں — وہ اکیلے کام کر رہے ہیں، تھکے ہوئے، غیر مرئی۔
+
+کرونا وہ رابطہ ہے جو انہیں جوڑتا ہے۔ جہاں ہر جانور جو نہیں بچا — اسے عزت سے یاد کیا جائے۔`,
+    pillars: [
+      { icon: '🔒', name: 'رازداری' },
+      { icon: '🌿', name: 'شفافیت' },
+      { icon: '🤝', name: 'برادری' },
+    ]
+  },
+  es: {
+    title: '¿Qué es Karuna?',
+    body: `Karuna es una plataforma de bienestar animal de código abierto, centrada en la privacidad, construida para las comunidades rurales de India — y para cualquier persona en cualquier lugar que se preocupe por los animales que no pueden hablar por sí mismos.
+
+La construimos porque en los pueblos de Maharashtra, un perro herido en la carretera no tiene a nadie a quien llamar. Un gato callejero pariendo en la lluvia no tiene refugio. Una vaca abandonada con una herida no tiene veterinario. Y las pocas personas que sí se preocupan trabajan solas, agotadas, invisibles.
+
+Karuna es el tejido conectivo. Un lugar donde quien encontró al animal herido puede llegar al voluntario que está a tres calles de distancia.`,
+    pillars: [
+      { icon: '🔒', name: 'Privacidad' },
+      { icon: '🌿', name: 'Transparencia' },
+      { icon: '🤝', name: 'Comunidad' },
+    ]
+  },
+  fr: {
+    title: "Qu'est-ce que Karuna?",
+    body: `Karuna est une plateforme de bien-être animal open source et respectueuse de la vie privée, construite pour les communautés rurales d'Inde — et pour toute personne dans le monde qui se soucie des animaux qui ne peuvent pas parler pour eux-mêmes.
+
+Nous l'avons construite parce que dans les villages du Maharashtra, un chien blessé sur l'autoroute n'a personne à appeler. Un chat errant mettant bas sous la pluie n'a pas d'abri. Une vache abandonnée avec une blessure n'a pas de vétérinaire. Et les rares personnes qui s'en soucient travaillent seules, épuisées, invisibles.
+
+Karuna est le tissu connectif. Un endroit où celui qui a trouvé l'animal blessé peut atteindre le bénévole à trois rues de là.`,
+    pillars: [
+      { icon: '🔒', name: 'Confidentialité' },
+      { icon: '🌿', name: 'Transparence' },
+      { icon: '🤝', name: 'Communauté' },
+    ]
+  },
+  de: {
+    title: 'Was ist Karuna?',
+    body: `Karuna ist eine Open-Source-Tierschutzplattform mit Fokus auf Datenschutz, entwickelt für ländliche Gemeinschaften in Indien — und für alle Menschen weltweit, denen Tiere am Herzen liegen, die nicht für sich selbst sprechen können.
+
+Wir haben sie gebaut, weil in Dörfern Maharashtras ein verletzter Hund auf der Autobahn niemanden zum Anrufen hat. Eine streunende Katze, die im Regen Junge gebärt, hat kein Obdach. Eine verlassene Kuh mit einer Wunde hat keinen Tierarzt. Und die wenigen Menschen, die sich kümmern, arbeiten allein, erschöpft, unsichtbar.
+
+Karuna ist das verbindende Gewebe. Ein Ort, an dem derjenige, der das verletzte Tier gefunden hat, den Freiwilligen drei Straßen weiter erreichen kann.`,
+    pillars: [
+      { icon: '🔒', name: 'Datenschutz' },
+      { icon: '🌿', name: 'Transparenz' },
+      { icon: '🤝', name: 'Gemeinschaft' },
+    ]
+  },
+  bn: {
+    title: 'করুণা কী?',
+    body: `করুণা একটি ওপেন-সোর্স, গোপনীয়তা-প্রথম প্রাণী কল্যাণ প্ল্যাটফর্ম — গ্রামীণ ভারতের জন্য নির্মিত, এবং বিশ্বের যে কারো জন্য যারা নিজেদের হয়ে কথা বলতে পারে না এমন প্রাণীদের জন্য যত্নশীল।
+
+আমরা এটি তৈরি করেছিলাম কারণ মহারাষ্ট্রের গ্রামগুলিতে হাইওয়েতে একটি আহত কুকুরের জন্য কাউকে ডাকার নেই। বৃষ্টিতে বাচ্চা দিচ্ছে একটি পথকুকুরের কোনো আশ্রয় নেই। যারা যত্ন করে তারা একা কাজ করছে, ক্লান্ত, অদৃশ্য।
+
+করুণা সেই সংযোগকারী সূত্র। যেখানে আহত প্রাণী খুঁজে পাওয়া ব্যক্তি তিন রাস্তা দূরের স্বেচ্ছাসেবীর কাছে পৌঁছাতে পারে।`,
+    pillars: [
+      { icon: '🔒', name: 'গোপনীয়তা' },
+      { icon: '🌿', name: 'স্বচ্ছতা' },
+      { icon: '🤝', name: 'সম্প্রদায়' },
+    ]
+  },
+  ta: {
+    title: 'கருணா என்றால் என்ன?',
+    body: `கருணா என்பது ஒரு திறந்த மூல, தனியுரிமை-முதல் விலங்கு நல தளம் — கிராமப்புற இந்தியாவிற்காக கட்டப்பட்டது, மற்றும் தங்களுக்காக பேச முடியாத விலங்குகளை அக்கறை கொள்ளும் உலகம் முழுவதும் உள்ள எவருக்கும்.
+
+மகாராஷ்டிராவில் நெடுஞ்சாலையில் காயப்பட்ட நாயை அழைக்க யாரும் இல்லை. மழையில் குட்டிகள் பெற்ற தெரு பூனைக்கு தங்குமிடம் இல்லை. அக்கறை கொள்பவர்கள் தனியாக உழைக்கிறார்கள், சோர்வடைந்து, கண்ணுக்கு தெரியாமல்.
+
+கருணா அந்த இணைப்பு நூல். காயப்பட்ட விலங்கை கண்டவர் மூன்று தெரு தூரத்தில் உள்ள தொண்டரை அடைய முடியும்.`,
+    pillars: [
+      { icon: '🔒', name: 'தனியுரிமை' },
+      { icon: '🌿', name: 'வெளிப்படைத்தன்மை' },
+      { icon: '🤝', name: 'சமூகம்' },
+    ]
+  },
+  te: {
+    title: 'కరుణ అంటే ఏమిటి?',
+    body: `కరుణ అనేది ఒక ఓపెన్-సోర్స్, ప్రైవసీ-ఫస్ట్ జంతు సంక్షేమ వేదిక — గ్రామీణ భారతదేశం కోసం నిర్మించబడింది, మరియు తమకోసం మాట్లాడలేని జంతువులను శ్రద్ధ చూపే ప్రపంచవ్యాప్తంగా ఉన్న ప్రతి ఒక్కరికీ.
+
+మహారాష్ట్ర గ్రామాలలో హైవేపై గాయపడిన కుక్కకు పిలవడానికి ఎవరూ లేరు. వర్షంలో పిల్లలను కనే వీధి పిల్లికి ఆశ్రయం లేదు. జంతువులపై శ్రద్ధ చూపేవారు ఒంటరిగా పనిచేస్తున్నారు, అలసిపోయి, కనిపించకుండా.
+
+కరుణ ఆ అనుసంధాన సూత్రం. గాయపడిన జంతువును కనుగొన్న వ్యక్తి మూడు వీధుల దూరంలో ఉన్న స్వచ్ఛంద సేవకుడిని చేరుకోగలరు.`,
+    pillars: [
+      { icon: '🔒', name: 'గోప్యత' },
+      { icon: '🌿', name: 'పారదర్శకత' },
+      { icon: '🤝', name: 'సమాజం' },
+    ]
+  },
+  ar: {
+    title: 'ما هي كارونا؟',
+    body: `كارونا هي منصة مفتوحة المصدر لرعاية الحيوانات تُعطي الأولوية للخصوصية — بُنيت للمجتمعات الريفية في الهند، ولكل شخص في العالم يهتم بالحيوانات التي لا تستطيع التحدث عن نفسها.
+
+بنيناها لأنه في قرى ماهاراشترا، لا يوجد أحد لاستدعائه من أجل كلب مصاب على الطريق السريع. لا مأوى لقطة ضالة تلد في المطر. لا طبيب بيطري لبقرة مهجورة بجرح. والقلة الذين يهتمون — يعملون بمفردهم، منهكين، غير مرئيين.
+
+كارونا هو النسيج الرابط. مكان يمكن فيه لمن وجد الحيوان المصاب الوصول إلى المتطوع على بُعد ثلاثة شوارع.`,
+    pillars: [
+      { icon: '🔒', name: 'الخصوصية' },
+      { icon: '🌿', name: 'الشفافية' },
+      { icon: '🤝', name: 'المجتمع' },
+    ]
+  },
+  pt: {
+    title: 'O que é Karuna?',
+    body: `Karuna é uma plataforma de bem-estar animal de código aberto e focada em privacidade, construída para comunidades rurais da Índia — e para qualquer pessoa no mundo que se preocupe com animais que não podem falar por si mesmos.
+
+Nós a construímos porque nas aldeias de Maharashtra, um cão ferido na estrada não tem ninguém para chamar. Uma gata de rua parindo na chuva não tem abrigo. Uma vaca abandonada com uma ferida não tem veterinário. E as poucas pessoas que se importam trabalham sozinhas, exaustas, invisíveis.
+
+Karuna é o tecido conectivo. Um lugar onde quem encontrou o animal ferido pode alcançar o voluntário a três ruas de distância.`,
+    pillars: [
+      { icon: '🔒', name: 'Privacidade' },
+      { icon: '🌿', name: 'Transparência' },
+      { icon: '🤝', name: 'Comunidade' },
+    ]
+  },
+};
+
+// ── BUILD LANG PILLS + ABOUT TABS ──
+let currentAboutLang = 'en';
+
+function buildLangBar() {
+  const bar = document.getElementById('lang-bar');
+  bar.innerHTML = LANGUAGES.map(l =>
+    `<button class="lang-pill ${l.code==='en'?'active':''}" onclick="setLang('${l.code}')">${l.label}</button>`
+  ).join('');
+}
+
+function buildAboutTabs() {
+  const tabs = document.getElementById('about-tabs');
+  const contents = document.getElementById('about-contents');
+  tabs.innerHTML = LANGUAGES.map(l =>
+    `<button class="lang-tab ${l.code==='en'?'active':''}" onclick="setAboutLang('${l.code}')" id="abt-${l.code}">${l.label}</button>`
+  ).join('');
+  contents.innerHTML = LANGUAGES.map(l => {
+    const d = ABOUT_CONTENT[l.code] || ABOUT_CONTENT['en'];
+    return `<div class="about-content ${l.code==='en'?'active':''}" id="ac-${l.code}">
+      <h3>${d.title}</h3>
+      ${d.body.split('\n\n').map(p => `<p>${p}</p>`).join('')}
+      <div class="about-pillars">
+        ${d.pillars.map(p => `<div class="pillar"><div class="pillar-icon">${p.icon}</div><div class="pillar-name">${p.name}</div></div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function setLang(code) {
+  document.querySelectorAll('.lang-pill').forEach(p => p.classList.remove('active'));
+  document.querySelector(`.lang-pill[onclick="setLang('${code}')"]`)?.classList.add('active');
+  setAboutLang(code);
+  document.body.style.direction = ['ur','ar'].includes(code) ? 'rtl' : 'ltr';
+}
+
+function setAboutLang(code) {
+  currentAboutLang = code;
+  document.querySelectorAll('.lang-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(`abt-${code}`)?.classList.add('active');
+  document.querySelectorAll('.about-content').forEach(c => c.classList.remove('active'));
+  document.getElementById(`ac-${code}`)?.classList.add('active');
+}
+
+// ── INIT ──
+window.onload = () => {
+  buildLangBar();
+  buildAboutTabs();
+};
+</script>
+</body>
+</html>
