@@ -460,16 +460,15 @@
       <span class="sidebar-title" data-i18n="liveReports">Live Reports</span>
       <span class="live-badge"><span class="live-dot"></span> Live</span>
     </div>
-    <div id="reports-list">
+    <div id="reports-list"></div>
   <div id="empty-state" style="display:none; text-align:center; padding:40px 20px;">
-    <img src="assets/empty-state.png" alt="Be the first to help here" 
+    <img src="assets/empty-state.png" alt="Be the first to help here"
          style="width:140px; opacity:0.6; margin-bottom:12px;">
-    <div style="font-size:0.7rem; color:rgba(245,239,230,0.3); 
+    <div style="font-size:0.7rem; color:rgba(245,239,230,0.3);
                 letter-spacing:2px; text-transform:uppercase;">
       Be the first to help here
     </div>
   </div>
-</div>
   </div>
 
   <!-- MAP -->
@@ -935,7 +934,7 @@ function timeAgo(isoString) {
 
 function renderSidebar() {
   const filtered = activeFilter === 'all' ? allReports : allReports.filter(r => r.type === activeFilter);
-  document.getElementById('empty-state').style.display = filtered.length === 0 ? 'block' : 'none';
+  const es = document.getElementById('empty-state'); if (es) es.style.display = filtered.length === 0 ? 'block' : 'none';
   document.getElementById('reports-list').innerHTML = filtered.map(r => `
     <div class="report-card ${r.type==='rip'?'rip-card':''}" onclick="focusReport(${r.id})">
       <div class="card-top">
@@ -1062,6 +1061,12 @@ async function submitReport() {
   // Save to Supabase if connected, otherwise local only
   if (SUPABASE_URL !== 'YOUR_SUPABASE_URL') {
     // Check auth session before insert
+    // Timeout safety — prevent infinite spinning
+    const insertTimeout = setTimeout(() => {
+      showToast('Request timed out. Check your connection.');
+      btn.textContent = (I18N[currentLang]||I18N.en).submitReport; btn.disabled = false;
+    }, 8000);
+
     const { data: sessionData } = await sb.auth.getSession();
     if (!sessionData.session) {
       showToast('Session expired. Please refresh and login again.');
@@ -1071,11 +1076,13 @@ async function submitReport() {
 
     const { data, error } = await sb.from('reports').insert([report]).select().single();
     if (error) {
+      clearTimeout(insertTimeout);
       console.error('Supabase insert error:', error);
-      showToast(`Could not save: ${error.message}`);
+      showToast(`Error: ${error.message}`);
       btn.textContent = (I18N[currentLang]||I18N.en).submitReport; btn.disabled = false;
       return;
     }
+    clearTimeout(insertTimeout);
     allReports.unshift(data);
   } else {
     // Demo mode — local only
@@ -1083,7 +1090,7 @@ async function submitReport() {
   }
 
   renderSidebar(); renderMarkers(); updateStats();
-  map.flyTo([lat, lng], 12, { duration: 1.5 });
+  setTimeout(() => map.flyTo([lat, lng], 12, { duration: 1.5 }), 100);
   showDetail(allReports[0]);
   closePostModal();
   btn.textContent = (I18N[currentLang]||I18N.en).submitReport; btn.disabled = false;
