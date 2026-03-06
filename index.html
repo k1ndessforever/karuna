@@ -258,6 +258,127 @@
   @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
   @keyframes slideUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+  /* ── MOBILE RESPONSIVE ── */
+  @media (max-width: 768px) {
+
+    /* Stack layout vertically on mobile */
+    #app {
+      grid-template-columns: 1fr;
+      grid-template-rows: 52px 1fr 52px;
+    }
+
+    /* Topbar — compact */
+    #topbar {
+      padding: 0 12px; gap: 8px;
+    }
+    .topbar-center { display: none; }
+    .brand-en { display: none; }
+    .brand-main { font-size: 1.2rem; }
+    .user-chip { padding: 4px 8px; font-size: 0.65rem; }
+    .btn-post { padding: 6px 12px; font-size: 0.65rem; }
+    #lang-btn-label { padding: 4px 8px; font-size: 0.65rem; }
+
+    /* Sidebar becomes bottom sheet on mobile */
+    #sidebar {
+      position: fixed;
+      bottom: 52px; left: 0; right: 0;
+      height: 45vh;
+      z-index: 200;
+      border-right: none;
+      border-top: 2px solid rgba(138,171,122,0.2);
+      transform: translateY(calc(100% - 48px));
+      transition: transform 0.3s ease;
+    }
+    #sidebar.open {
+      transform: translateY(0);
+    }
+    .sidebar-header {
+      cursor: pointer;
+      justify-content: center;
+      gap: 12px;
+    }
+    .sidebar-handle {
+      width: 36px; height: 4px;
+      background: rgba(138,171,122,0.3);
+      border-radius: 2px;
+    }
+
+    /* Map takes full screen */
+    #map {
+      grid-column: 1;
+      grid-row: 2;
+      height: calc(100vh - 104px);
+    }
+
+    /* Bottom nav bar */
+    #mobile-nav {
+      display: flex;
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 52px;
+      background: var(--bark);
+      border-top: 1px solid rgba(138,171,122,0.15);
+      z-index: 300;
+    }
+
+    /* Map stats — smaller on mobile */
+    #map-stats {
+      top: 8px; right: 8px; gap: 5px;
+    }
+    .stat-chip { padding: 4px 7px; }
+    .stat-num { font-size: 0.85rem; }
+    .stat-label { font-size: 0.5rem; }
+
+    /* Legend — hidden on mobile, too cluttered */
+    #map-legend { display: none; }
+
+    /* Detail panel — full width bottom on mobile */
+    #detail-panel {
+      top: auto;
+      bottom: 60px;
+      left: 8px; right: 8px;
+      width: auto;
+    }
+
+    /* Modal — full screen on mobile */
+    .modal {
+      width: 100vw;
+      max-height: 95vh;
+      border-radius: 12px 12px 0 0;
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      margin: 0;
+    }
+    #modal-overlay {
+      align-items: flex-end;
+    }
+
+    /* Onboarding — full screen on mobile */
+    .onboard-box {
+      width: 100vw;
+      min-height: 100vh;
+      border-radius: 0;
+      padding: 40px 24px;
+      overflow-y: auto;
+    }
+    .onboard-lang-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    /* Type grid — 2 col on mobile */
+    .type-grid { grid-template-columns: 1fr 1fr; }
+
+    /* Language dropdown */
+    .lang-dropdown { right: 0; min-width: 180px; }
+  }
+
+  @media (max-width: 380px) {
+    .onboard-lang-grid { grid-template-columns: repeat(3, 1fr); }
+    .stat-chip { padding: 3px 5px; }
+    .stat-num { font-size: 0.75rem; }
+  }
+
 </style>
 </head>
 <body>
@@ -334,7 +455,8 @@
 
   <!-- SIDEBAR -->
   <div id="sidebar">
-    <div class="sidebar-header">
+    <div class="sidebar-handle" style="width:36px;height:4px;background:rgba(138,171,122,0.3);border-radius:2px;margin:8px auto 0;"></div>
+    <div class="sidebar-header" onclick="toggleSidebar()">
       <span class="sidebar-title" data-i18n="liveReports">Live Reports</span>
       <span class="live-badge"><span class="live-dot"></span> Live</span>
     </div>
@@ -376,6 +498,25 @@
       <div class="legend-item"><div class="legend-dot" style="background:var(--rip)"></div><span data-i18n="ripLabel">Remembered 🕊️</span></div>
     </div>
   </div>
+</div>
+
+<!-- MOBILE BOTTOM NAV -->
+<div id="mobile-nav" style="display:none;">
+  <button onclick="filterReports('all', this); toggleSidebar()" style="flex:1;background:none;border:none;color:rgba(245,239,230,0.5);font-family:'DM Mono';font-size:0.55rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:6px 0;">
+    <span style="font-size:1.1rem;">🗺️</span>All
+  </button>
+  <button onclick="filterReports('rescue', this); toggleSidebar()" style="flex:1;background:none;border:none;color:rgba(245,239,230,0.5);font-family:'DM Mono';font-size:0.55rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:6px 0;">
+    <span style="font-size:1.1rem;">🆘</span>Rescue
+  </button>
+  <button onclick="openPostModal()" style="flex:1;background:var(--leaf);border:none;border-radius:50%;width:44px;height:44px;color:var(--cream);font-size:1.4rem;cursor:pointer;display:flex;align-items:center;justify-content:center;margin:4px auto;flex-shrink:0;">
+    +
+  </button>
+  <button onclick="filterReports('adopt', this); toggleSidebar()" style="flex:1;background:none;border:none;color:rgba(245,239,230,0.5);font-family:'DM Mono';font-size:0.55rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:6px 0;">
+    <span style="font-size:1.1rem;">🏠</span>Adopt
+  </button>
+  <button onclick="toggleSidebar()" style="flex:1;background:none;border:none;color:rgba(245,239,230,0.5);font-family:'DM Mono';font-size:0.55rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:6px 0;">
+    <span style="font-size:1.1rem;">📋</span>Reports
+  </button>
 </div>
 
 <!-- POST MODAL -->
@@ -732,6 +873,9 @@ function enterApp(nick) {
   document.getElementById('user-nick').textContent = nick;
   document.getElementById('onboard-overlay').style.display = 'none';
   document.getElementById('app').classList.add('visible');
+  // Show mobile nav on mobile
+  const nav = document.getElementById('mobile-nav');
+  if (nav && isMobile()) nav.style.display = 'flex';
   initMap();
   loadReports();
   const t = I18N[currentLang] || I18N.en;
@@ -917,9 +1061,18 @@ async function submitReport() {
 
   // Save to Supabase if connected, otherwise local only
   if (SUPABASE_URL !== 'YOUR_SUPABASE_URL') {
+    // Check auth session before insert
+    const { data: sessionData } = await sb.auth.getSession();
+    if (!sessionData.session) {
+      showToast('Session expired. Please refresh and login again.');
+      btn.textContent = (I18N[currentLang]||I18N.en).submitReport; btn.disabled = false;
+      return;
+    }
+
     const { data, error } = await sb.from('reports').insert([report]).select().single();
     if (error) {
-      showToast('Could not save report. Try again.');
+      console.error('Supabase insert error:', error);
+      showToast(`Could not save: ${error.message}`);
       btn.textContent = (I18N[currentLang]||I18N.en).submitReport; btn.disabled = false;
       return;
     }
@@ -1018,6 +1171,20 @@ function dropPin(lat, lng) {
   });
   pinMarker = L.marker([lat, lng], { icon }).addTo(map);
 }
+
+// ── MOBILE DETECTION ──
+function isMobile() { return window.innerWidth <= 768; }
+
+function toggleSidebar() {
+  if (!isMobile()) return;
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+// Show mobile nav on mobile
+window.addEventListener('resize', () => {
+  const nav = document.getElementById('mobile-nav');
+  if (nav) nav.style.display = isMobile() ? 'flex' : 'none';
+});
 
 function showToast(msg) {
   const t = document.getElementById('toast');
