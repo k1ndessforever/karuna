@@ -85,6 +85,130 @@
   .btn-post { background: var(--leaf); color: var(--cream); border: none; padding: 7px 16px; border-radius: 100px; font-family: 'DM Mono', monospace; font-size: 0.7rem; letter-spacing: 1px; cursor: pointer; text-transform: uppercase; transition: all 0.2s ease; }
   .btn-post:hover { background: var(--sage); color: var(--soil); }
 
+
+  /* ── BUTTON INSTANT FEEDBACK ── */
+  .btn-post, .btn-submit {
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+  .btn-post:active {
+    transform: scale(0.94);
+    opacity: 0.8;
+  }
+  .btn-submit:active {
+    transform: scale(0.97);
+    opacity: 0.85;
+  }
+  .btn-post:disabled, .btn-submit:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+    pointer-events: none;
+  }
+
+  /* ── + REPORT BUTTON — modern pill shape ── */
+  .btn-post {
+    background: var(--leaf);
+    color: var(--cream);
+    border: none;
+    padding: 8px 20px;
+    border-radius: 100px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 1.5px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: transform 0.15s ease, background 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 2px 12px rgba(90,122,74,0.3);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .btn-post:hover {
+    background: var(--sage);
+    box-shadow: 0 4px 18px rgba(90,122,74,0.45);
+    transform: translateY(-1px);
+  }
+
+  /* ── MOBILE + BUTTON — modern rounded square not oval ── */
+  .mobile-add-btn {
+    width: 46px; height: 46px;
+    background: var(--leaf);
+    border: none;
+    border-radius: 14px;
+    color: var(--cream);
+    font-size: 1.5rem;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    margin: 3px auto;
+    box-shadow: 0 2px 12px rgba(90,122,74,0.4);
+    transition: transform 0.15s ease, box-shadow 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+    flex-shrink: 0;
+  }
+  .mobile-add-btn:active {
+    transform: scale(0.88);
+    box-shadow: 0 1px 6px rgba(90,122,74,0.3);
+  }
+
+  /* ── SUBMIT LOADER OVERLAY ── */
+  #submit-loader {
+    display: none;
+    position: fixed; inset: 0;
+    z-index: 9000;
+    background: rgba(10,8,4,0.7);
+    backdrop-filter: blur(4px);
+    align-items: center; justify-content: center;
+    flex-direction: column; gap: 16px;
+  }
+  #submit-loader.show { display: flex; }
+  .submit-loader-paw {
+    font-size: 2rem;
+    animation: pawBounce 0.6s ease infinite alternate;
+  }
+  .submit-loader-text {
+    font-family: 'DM Mono'; font-size: 0.7rem;
+    letter-spacing: 3px; text-transform: uppercase;
+    color: var(--sage);
+  }
+  .submit-loader-dots {
+    display: flex; gap: 6px;
+  }
+  .submit-loader-dots span {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--leaf);
+    animation: pulse 1s ease infinite;
+  }
+  .submit-loader-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .submit-loader-dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes pawBounce {
+    from { transform: translateY(0) scale(1); }
+    to   { transform: translateY(-8px) scale(1.15); }
+  }
+
+  /* ── REPORT CARD — description preview ── */
+  .card-desc {
+    font-size: 0.7rem;
+    color: rgba(245,239,230,0.45);
+    line-height: 1.5;
+    margin: 4px 0 6px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* ── REPORT CARD — hover lift effect ── */
+  .report-card {
+    transition: background 0.15s ease, transform 0.15s ease;
+  }
+  .report-card:hover {
+    background: rgba(42,61,30,0.4);
+    transform: translateX(3px);
+  }
+  .report-card:active {
+    transform: translateX(1px);
+  }
+
+
   /* Language switcher in topbar */
   .lang-switcher {
     position: relative;
@@ -507,9 +631,7 @@
   <button onclick="filterReports('rescue', this); toggleSidebar()" style="flex:1;background:none;border:none;color:rgba(245,239,230,0.5);font-family:'DM Mono';font-size:0.55rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:6px 0;">
     <span style="font-size:1.1rem;">🆘</span>Rescue
   </button>
-  <button onclick="openPostModal()" style="flex:1;background:var(--leaf);border:none;border-radius:50%;width:44px;height:44px;color:var(--cream);font-size:1.4rem;cursor:pointer;display:flex;align-items:center;justify-content:center;margin:4px auto;flex-shrink:0;">
-    +
-  </button>
+  <button onclick="openPostModal()" class="mobile-add-btn">＋</button>
   <button onclick="filterReports('adopt', this); toggleSidebar()" style="flex:1;background:none;border:none;color:rgba(245,239,230,0.5);font-family:'DM Mono';font-size:0.55rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:6px 0;">
     <span style="font-size:1.1rem;">🏠</span>Adopt
   </button>
@@ -944,6 +1066,7 @@ function renderSidebar() {
       </div>
       <div class="card-title">${r.title}</div>
       <div class="card-location">${r.location_name}</div>
+      ${(r.description||r.desc) ? `<div class="card-desc">${(r.description||r.desc)}</div>` : ''}
       ${r.rip_notice ? `<div class="rip-notice">${r.rip_notice}</div>` : ''}
       <div class="card-footer">
         <span class="card-anon">@${r.nickname}</span>
@@ -983,14 +1106,18 @@ function showDetail(r) {
   document.getElementById('detail-type').textContent = `${EMOJIS[r.type]} ${r.type.toUpperCase()}`;
   document.getElementById('detail-type').style.color = COLORS[r.type];
   document.getElementById('detail-title').textContent = r.title;
-  document.getElementById('detail-desc').textContent = r.rip_notice || r.desc;
+  document.getElementById('detail-desc').textContent = r.rip_notice || r.description || r.desc || '';
   document.getElementById('detail-meta').textContent = `◎ ${r.location_name} · @${r.nickname} · ${timeAgo(r.created_at)}`;
   document.getElementById('detail-panel').classList.add('open');
 }
 function closeDetail() { document.getElementById('detail-panel').classList.remove('open'); }
 
 // ── POST ──
-function openPostModal() { document.getElementById('modal-overlay').classList.add('open'); }
+function openPostModal() {
+  const btn = document.querySelector('.btn-post');
+  if (btn) { btn.style.transform = 'scale(0.94)'; btn.style.opacity = '0.8'; setTimeout(() => { btn.style.transform = ''; btn.style.opacity = ''; }, 150); }
+  document.getElementById('modal-overlay').classList.add('open');
+}
 function closePostModal() {
   document.getElementById('modal-overlay').classList.remove('open');
   selectedType = null;
@@ -1037,6 +1164,7 @@ async function submitReport() {
 
   const btn = document.getElementById('submit-btn');
   btn.textContent = 'Submitting...'; btn.disabled = true;
+  document.getElementById('submit-loader').classList.add('show');
 
   // Use pinned coordinates if available, else parse from text, else random Maharashtra
   let lat = pinnedLat || 19.0 + Math.random()*3;
@@ -1063,6 +1191,7 @@ async function submitReport() {
     // Check auth session before insert
     // Timeout safety — prevent infinite spinning
     const insertTimeout = setTimeout(() => {
+      document.getElementById('submit-loader').classList.remove('show');
       showToast('Request timed out. Check your connection.');
       btn.textContent = (I18N[currentLang]||I18N.en).submitReport; btn.disabled = false;
     }, 8000);
@@ -1077,12 +1206,14 @@ async function submitReport() {
     const { data, error } = await sb.from('reports').insert([report]).select().single();
     if (error) {
       clearTimeout(insertTimeout);
+      document.getElementById('submit-loader').classList.remove('show');
       console.error('Supabase insert error:', error);
       showToast(`Error: ${error.message}`);
       btn.textContent = (I18N[currentLang]||I18N.en).submitReport; btn.disabled = false;
       return;
     }
     clearTimeout(insertTimeout);
+    document.getElementById('submit-loader').classList.remove('show');
     allReports.unshift(data);
   } else {
     // Demo mode — local only
@@ -1093,6 +1224,7 @@ async function submitReport() {
   setTimeout(() => map.flyTo([lat, lng], 12, { duration: 1.5 }), 100);
   showDetail(allReports[0]);
   closePostModal();
+  document.getElementById('submit-loader').classList.remove('show');
   btn.textContent = (I18N[currentLang]||I18N.en).submitReport; btn.disabled = false;
   showToast((I18N[currentLang]||I18N.en).submitted);
 }
@@ -1199,5 +1331,11 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 3200);
 }
 </script>
+<!-- SUBMIT LOADER -->
+<div id="submit-loader">
+  <div class="submit-loader-paw">🐾</div>
+  <div class="submit-loader-text">Posting report...</div>
+  <div class="submit-loader-dots"><span></span><span></span><span></span></div>
+</div>
 </body>
 </html>
