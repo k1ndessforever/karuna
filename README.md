@@ -1,13 +1,13 @@
-# 🐾 Karuna — करुणा
+🐾 Karuna करुणा
 
-> *"We don't beg for sympathy — it's within us."*
+> *"We don't beg for sympathy it's within us."*
 
-An open-source, privacy-first animal welfare platform for rural India.  
+An open-source, privacy-first animal welfare platform for everybody.  
 Built for the voiceless. Run by the compassionate. Owned by no one.
 
 ---
 
-## What is this?
+What is this?
 
 Karuna connects people who care about stray and wild animals —  
 enabling real-time rescue coordination, adoption listing, feeding spot mapping,  
@@ -18,9 +18,9 @@ Just real people. Real animals. Real help.
 
 ---
 
-## Why it exists
+Why it exists
 
-In villages across Maharashtra — and everywhere rural India —  
+In villages across Maharashtra and everywhere rural part India  
 an injured dog on the highway has nobody to call.  
 A stray cat having kittens in the rain has no shelter.  
 A cow abandoned with a wound has no vet.  
@@ -30,7 +30,7 @@ Karuna is the connective tissue.
 
 ---
 
-## What it does
+What it does
 
 | Feature | Description |
 |---|---|
@@ -45,7 +45,7 @@ Karuna is the connective tissue.
 
 ---
 
-## Tech stack
+Tech stack
 
 ```
 Maps        →  Leaflet.js + OpenStreetMap  (open source, no Google)
@@ -60,7 +60,7 @@ No paid tools. No tracking scripts. No ads. Ever.
 
 ---
 
-## Privacy — the short version
+Privacy — the short version
 
 ✅ Collected — email (OTP only), nickname, report content, timestamp  
 🚫 Never collected — phone number, real name, GPS, IP address, device info  
@@ -70,7 +70,7 @@ Full transparency at `/about-karuna.html` inside the platform.
 
 ---
 
-## Running locally
+Running locally
 
 ```bash
 git clone https://github.com/k1ndnessforever/karuna.git
@@ -81,7 +81,7 @@ cd karuna
 
 ---
 
-## Deploying to Vercel
+Deploying to Vercel
 
 ```bash
 npm install -g vercel
@@ -93,7 +93,7 @@ See `karuna-deploy-guide.md` for full step-by-step instructions.
 
 ---
 
-## Cost — honest breakdown
+Cost breakdown
 
 | Service | Cost |
 |---|---|
@@ -103,23 +103,23 @@ See `karuna-deploy-guide.md` for full step-by-step instructions.
 | Domain (optional) | ~₹800/year |
 | Claude AI per report | ~₹0.10 |
 
-**Free until ~5,000 active users.**
+Free until ~5,000 active users.**
 
 ---
 
-## For whoever continues this
+#For whoever continues this
 
-If this project ever goes dark —  
-if the maintainer can no longer continue —  
+If this project ever goes dark 
+if the maintainer can no longer continue 
 **fork it. rebuild it. keep it honest.**
 
 No permission needed.  
 No credit required.  
-Just keep it for the animals.
+Just keep it for the animals,keep it for your heart.
 
-License: **MIT** — use freely, build openly, charge nothing.
+License: **MIT** use freely, build openly, charge nothing.
 
-The only ask — not legal, just human:  
+The only ask not legal, just human:  
 *Don't monetize it. Don't sell the data. Keep it transparent.*
 
 ---
@@ -132,6 +132,6 @@ Every line of code is in service of the animals.
 
 ---
 
-*Karuna — करुणा — کرونا — கருணா — కరుణ*  
+*Karuna करुणा کرونا கருணா కరుణ*  
 *Built with honesty. For every animal overlooked.*
 
