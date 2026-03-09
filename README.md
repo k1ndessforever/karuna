@@ -1,6 +1,6 @@
 🐾 Karuna करुणा
 
-> *"We don't beg for sympathy it's within us."*
+> *"Do Small Things, With Great Love."*
 
 An open-source, privacy-first animal welfare platform for everybody.  
 Built for the voiceless. Run by the compassionate. Owned by no one.
@@ -34,14 +34,14 @@ What it does
 
 | Feature | Description |
 |---|---|
-| 🗺️ Map-First | All reports live on OpenStreetMap — zero Google |
-| 🆘 Rescue | Report injured animals anonymously with location |
-| 🏠 Adoption | List strays available, match with verified homes |
-| 🍲 Feeding | Map community feeding spots, coordinate volunteers |
-| ✂️ Sterilization | Organize ABC drives, connect NGOs and vets |
-| 🕊️ Memorial | Honest records of animals who passed — named, remembered |
-| 🔒 Anonymous | Email + OTP only. No phone. No real name. No tracking |
-| 🌐 12 Languages | English, Hindi, Marathi, Urdu + 8 global languages |
+| Map-First | All reports live on OpenStreetMap — zero Google |
+| Rescue | Report injured animals anonymously with location |
+| Adoption | List strays available, match with verified homes |
+| Feeding | Map community feeding spots, coordinate volunteers |
+| Sterilization | Organize ABC drives, connect NGOs and vets |
+| Memorial | Honest records of animals who passed — named, remembered |
+| Anonymous | Email + OTP only. No phone. No real name. No tracking |
+| 12 Languages | English, Hindi, Marathi, Urdu + 8 global languages |
 
 ---
 
